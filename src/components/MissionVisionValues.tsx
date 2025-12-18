@@ -68,7 +68,7 @@ export default function MissionVisionValues() {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl text-[#2C5F2D] mb-4">Why Choose Mire Farms?</h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We're more than just a farm - we're a community dedicated to sustainable agriculture and healthy living
+            We&apos;re more than just a farm - we&apos;re a community dedicated to sustainable agriculture and healthy living
           </p>
         </div>
         

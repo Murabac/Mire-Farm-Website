@@ -6,7 +6,7 @@ export default function OurFarm() {
           Our Farm
         </h1>
         <p className="text-center text-lg">
-          Learn about our farm's history, mission, and values.
+          Learn about our farm&apos;s history, mission, and values.
         </p>
       </div>
     </main>
