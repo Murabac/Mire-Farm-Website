@@ -1,14 +1,19 @@
+import PageHeader from '@/components/PageHeader';
+
 export default function Gallery() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          Gallery
-        </h1>
-        <p className="text-center text-lg">
-          View photos of our farm and produce.
-        </p>
-      </div>
+    <main>
+      <PageHeader
+        badge={{
+          text: 'Visual Journey Through Mire Farms',
+        }}
+        title="Gallery 📸"
+        description={
+          <>
+            Explore our <span className="text-[#6B9E3E] font-semibold">farm, crops, and operations</span> through these beautiful images
+          </>
+        }
+      />
     </main>
   );
 }

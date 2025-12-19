@@ -1,14 +1,19 @@
+import PageHeader from '@/components/PageHeader';
+
 export default function News() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          News
-        </h1>
-        <p className="text-center text-lg">
-          Stay updated with the latest news from Mire Farms.
-        </p>
-      </div>
+    <main>
+      <PageHeader
+        badge={{
+          text: 'Latest Stories & Updates',
+        }}
+        title="News & Updates 📰"
+        description={
+          <>
+            Stay informed about the <span className="text-[#6B9E3E] font-semibold">latest happenings</span> at Mire Farms
+          </>
+        }
+      />
     </main>
   );
 }
