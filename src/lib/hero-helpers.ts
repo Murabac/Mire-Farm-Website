@@ -35,9 +35,10 @@ export async function getHeroSection(): Promise<HeroSection | null> {
 }
 
 // Helper function to get localized text
+// field should be the base field name without language suffix (e.g., 'badge_text', not 'badge_text_en')
 export function getLocalizedText(
   hero: HeroSection,
-  field: keyof HeroSection,
+  field: string,
   language: Language = 'en'
 ): string {
   const fieldKey = `${field}_${language}` as keyof HeroSection;
