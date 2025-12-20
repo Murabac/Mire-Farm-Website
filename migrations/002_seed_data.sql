@@ -2,8 +2,11 @@
 -- Run this after 001_initial_schema.sql
 -- This file contains initial data inserts
 
+-- Set search path to mire_farm_website schema
+SET search_path TO mire_farm_website, public;
+
 -- Insert Hero Section Data with English, Somali, and Arabic translations
-INSERT INTO hero_section (
+INSERT INTO mire_farm_website.hero_section (
   badge_text_en, badge_text_so, badge_text_ar,
   heading_prefix_en, heading_prefix_so, heading_prefix_ar,
   heading_highlight_en, heading_highlight_so, heading_highlight_ar,
@@ -70,6 +73,6 @@ INSERT INTO hero_section (
 
 -- Insert sample news articles (optional - for testing)
 -- Uncomment to insert sample data
--- INSERT INTO news_articles (title, date, author, image, excerpt, content, emoji, badge)
+-- INSERT INTO mire_farm_website.news_articles (title, date, author, image, excerpt, content, emoji, badge)
 -- VALUES 
 --   ('Sample Article 1', 'December 10, 2024', 'Farm Management', '/images/gellary-1.jpg', 'Sample excerpt', 'Sample content', '🏛️', 'Official Visit');

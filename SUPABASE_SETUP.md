@@ -68,8 +68,18 @@ Run the database migrations in order:
 1. Go to your Supabase project dashboard
 2. Navigate to **SQL Editor**
 3. Run the migrations from the `migrations/` folder in order:
-   - First: `001_initial_schema.sql` - Creates all tables, RLS policies, and indexes
+   - **First**: `000_create_schema.sql` - Creates the `mire_farm_website` schema
+   - Then: `001_initial_schema.sql` - Creates all tables, RLS policies, and indexes
    - Then: `002_seed_data.sql` - Inserts initial seed data (hero section)
+   - Then: `003_benefits_section.sql` - Creates benefits table and seed data
+   - Then: `004_mission_vision_values.sql` - Creates mission/vision/values tables
+   - Finally: `005_mission_vision_seed_data.sql` - Inserts mission/vision/values seed data
+
+4. **IMPORTANT**: After running `000_create_schema.sql`, you must expose the schema:
+   - Go to **Settings** → **API** in your Supabase dashboard
+   - Find the "Exposed schemas" section
+   - Add `mire_farm_website` to the list
+   - Click "Save"
 
 See `migrations/README.md` for more details about the migration files.
 

@@ -4,8 +4,13 @@ This folder contains SQL migration files for setting up and maintaining the Supa
 
 ## Migration Files
 
+### 000_create_schema.sql
+**IMPORTANT: Run this FIRST before any other migrations!**
+
+Creates the `mire_farm_website` schema and sets up necessary permissions. This allows the Mire Farm website to use its own dedicated schema within a shared Supabase project.
+
 ### 001_initial_schema.sql
-Creates all database tables, enables Row Level Security (RLS), sets up security policies, and creates indexes for optimal performance.
+Creates all database tables in the `mire_farm_website` schema, enables Row Level Security (RLS), sets up security policies, and creates indexes for optimal performance.
 
 **Tables created:**
 - `news_articles` - News and blog articles
@@ -35,7 +40,8 @@ Inserts initial seed data for mission, vision, and values with English, Somali, 
 
 1. **Initial Setup**: Run migrations in order:
    ```sql
-   -- First, run 001_initial_schema.sql
+   -- FIRST: Run 000_create_schema.sql (creates the mire_farm_website schema)
+   -- Then, run 001_initial_schema.sql
    -- Then, run 002_seed_data.sql
    -- Then, run 003_benefits_section.sql
    -- Then, run 004_mission_vision_values.sql
@@ -45,11 +51,12 @@ Inserts initial seed data for mission, vision, and values with English, Somali, 
 2. **In Supabase Dashboard**:
    - Go to SQL Editor
    - Copy and paste the contents of each migration file
-   - Run them in order (001, then 002, then 003, then 004, then 005)
+   - Run them in order (000, then 001, then 002, then 003, then 004, then 005)
 
 ## Migration Naming Convention
 
 Migrations are named with a three-digit prefix followed by an underscore and a descriptive name:
+- `000_create_schema.sql` - **Run this first!**
 - `001_initial_schema.sql`
 - `002_seed_data.sql`
 - `003_benefits_section.sql`
@@ -59,8 +66,18 @@ Migrations are named with a three-digit prefix followed by an underscore and a d
 
 This ensures migrations run in the correct order.
 
+## Schema Organization
+
+All tables are created in the `mire_farm_website` schema, allowing this website to coexist with other projects in the same Supabase database. This provides:
+- **Isolation**: Tables are organized under a dedicated schema
+- **Organization**: Easy to identify which tables belong to this project
+- **Multi-project support**: Share one Supabase project across multiple applications
+
+The Supabase client is configured to use the `mire_farm_website` schema by default.
+
 ## Notes
 
+- **Always run 000_create_schema.sql FIRST** before any other migrations
 - Always run migrations in order
 - Test migrations on a development database first
 - Keep migrations idempotent (safe to run multiple times) using `IF NOT EXISTS` clauses

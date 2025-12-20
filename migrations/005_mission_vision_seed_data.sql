@@ -1,8 +1,11 @@
 -- Seed Data for Mission, Vision, and Values Section
 -- Run this after 004_mission_vision_values.sql
 
+-- Set search path to mire_farm_website schema
+SET search_path TO mire_farm_website, public;
+
 -- Insert Section Header Data
-INSERT INTO mission_vision_section_header (title_en, title_so, title_ar, description_en, description_so, description_ar, active) VALUES
+INSERT INTO mire_farm_website.mission_vision_section_header (title_en, title_so, title_ar, description_en, description_so, description_ar, active) VALUES
   (
     'Why Choose Mire Farms?',
     'Maxaa Nooga Dooran Mire Farms?',
@@ -14,7 +17,7 @@ INSERT INTO mission_vision_section_header (title_en, title_so, title_ar, descrip
   );
 
 -- Insert Mission, Vision, Values Data
-INSERT INTO mission_vision_values (type, emoji, title_en, title_so, title_ar, description_en, description_so, description_ar, bg_color_class, border_color_class, display_order, active) VALUES
+INSERT INTO mire_farm_website.mission_vision_values (type, emoji, title_en, title_so, title_ar, description_en, description_so, description_ar, bg_color_class, border_color_class, display_order, active) VALUES
   (
     'mission',
     '🌱',
@@ -59,7 +62,7 @@ INSERT INTO mission_vision_values (type, emoji, title_en, title_so, title_ar, de
   );
 
 -- Insert Core Values Data
-INSERT INTO core_values (title_en, title_so, title_ar, description_en, description_so, description_ar, icon_type, color_class, display_order, active) VALUES
+INSERT INTO mire_farm_website.core_values (title_en, title_so, title_ar, description_en, description_so, description_ar, icon_type, color_class, display_order, active) VALUES
   (
     '100% Organic',
     '100% Dabiici',

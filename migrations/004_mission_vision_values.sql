@@ -1,8 +1,12 @@
 -- Mission, Vision, and Values Section Tables with Multi-language Support
 -- Run this SQL in your Supabase SQL Editor
+-- NOTE: Run 000_create_schema.sql and 001_initial_schema.sql FIRST
+
+-- Set search path to mire_farm_website schema
+SET search_path TO mire_farm_website, public;
 
 -- Mission, Vision, Values Table (Main three cards)
-CREATE TABLE IF NOT EXISTS mission_vision_values (
+CREATE TABLE IF NOT EXISTS mire_farm_website.mission_vision_values (
   id SERIAL PRIMARY KEY,
   -- Type: 'mission', 'vision', or 'values'
   type TEXT NOT NULL CHECK (type IN ('mission', 'vision', 'values')),
@@ -30,7 +34,7 @@ CREATE TABLE IF NOT EXISTS mission_vision_values (
 );
 
 -- Core Values Table (Four value cards)
-CREATE TABLE IF NOT EXISTS core_values (
+CREATE TABLE IF NOT EXISTS mire_farm_website.core_values (
   id SERIAL PRIMARY KEY,
   -- Title in different languages
   title_en TEXT NOT NULL,
@@ -54,7 +58,7 @@ CREATE TABLE IF NOT EXISTS core_values (
 );
 
 -- Section Header Table (Title and description)
-CREATE TABLE IF NOT EXISTS mission_vision_section_header (
+CREATE TABLE IF NOT EXISTS mire_farm_website.mission_vision_section_header (
   id SERIAL PRIMARY KEY,
   -- Title in different languages
   title_en TEXT NOT NULL,
@@ -72,27 +76,27 @@ CREATE TABLE IF NOT EXISTS mission_vision_section_header (
 );
 
 -- Enable Row Level Security (RLS)
-ALTER TABLE mission_vision_values ENABLE ROW LEVEL SECURITY;
-ALTER TABLE core_values ENABLE ROW LEVEL SECURITY;
-ALTER TABLE mission_vision_section_header ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mire_farm_website.mission_vision_values ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mire_farm_website.core_values ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mire_farm_website.mission_vision_section_header ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public read access
 CREATE POLICY "Mission vision values are viewable by everyone"
-  ON mission_vision_values FOR SELECT
+  ON mire_farm_website.mission_vision_values FOR SELECT
   USING (true);
 
 CREATE POLICY "Core values are viewable by everyone"
-  ON core_values FOR SELECT
+  ON mire_farm_website.core_values FOR SELECT
   USING (true);
 
 CREATE POLICY "Mission vision section header is viewable by everyone"
-  ON mission_vision_section_header FOR SELECT
+  ON mire_farm_website.mission_vision_section_header FOR SELECT
   USING (true);
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTS idx_mission_vision_values_type ON mission_vision_values(type);
-CREATE INDEX IF NOT EXISTS idx_mission_vision_values_display_order ON mission_vision_values(display_order);
-CREATE INDEX IF NOT EXISTS idx_mission_vision_values_active ON mission_vision_values(active);
-CREATE INDEX IF NOT EXISTS idx_core_values_display_order ON core_values(display_order);
-CREATE INDEX IF NOT EXISTS idx_core_values_active ON core_values(active);
-CREATE INDEX IF NOT EXISTS idx_mission_vision_section_header_active ON mission_vision_section_header(active);
+CREATE INDEX IF NOT EXISTS idx_mission_vision_values_type ON mire_farm_website.mission_vision_values(type);
+CREATE INDEX IF NOT EXISTS idx_mission_vision_values_display_order ON mire_farm_website.mission_vision_values(display_order);
+CREATE INDEX IF NOT EXISTS idx_mission_vision_values_active ON mire_farm_website.mission_vision_values(active);
+CREATE INDEX IF NOT EXISTS idx_core_values_display_order ON mire_farm_website.core_values(display_order);
+CREATE INDEX IF NOT EXISTS idx_core_values_active ON mire_farm_website.core_values(active);
+CREATE INDEX IF NOT EXISTS idx_mission_vision_section_header_active ON mire_farm_website.mission_vision_section_header(active);

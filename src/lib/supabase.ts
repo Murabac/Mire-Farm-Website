@@ -2,13 +2,19 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const SCHEMA_NAME = 'mire_farm_website';
 
 // Create client-side Supabase client
 // Note: This will work even if env vars are missing (for development)
 // Make sure to set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in production
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
+  supabaseAnonKey || 'placeholder-key',
+  {
+    db: {
+      schema: SCHEMA_NAME,
+    },
+  }
 );
 
 // Helper function to check if Supabase is configured
@@ -25,5 +31,9 @@ export const createServerClient = () => {
     throw new Error('Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
   }
   
-  return createClient(url, key);
+  return createClient(url, key, {
+    db: {
+      schema: SCHEMA_NAME,
+    },
+  });
 };
