@@ -24,7 +24,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-white">
+    <header className="w-full bg-white" dir="ltr">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -59,7 +59,7 @@ export default function Header() {
 
           {/* Contact Us Button */}
           <Link
-            href="/contact"
+            href="/#contact"
             className="hidden md:block bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
           >
             Contact Us
@@ -110,7 +110,7 @@ export default function Header() {
               ))}
               <li>
                 <Link
-                  href="/contact"
+                  href="/#contact"
                   className="block bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200 text-center mt-2"
                   onClick={() => setIsMenuOpen(false)}
                 >

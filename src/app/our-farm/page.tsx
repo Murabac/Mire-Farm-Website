@@ -1,8 +1,8 @@
 import PageHeader from '@/components/PageHeader';
-import BusinessModel from '@/components/BusinessModel';
-import ProduceTypes from '@/components/ProduceTypes';
-import SocialEnvironmentalImpact from '@/components/SocialEnvironmentalImpact';
-import GrowthExpansion from '@/components/GrowthExpansion';
+import BusinessModel from '@/components/our-farm/BusinessModel';
+import ProduceTypes from '@/components/our-farm/ProduceTypes';
+import SocialEnvironmentalImpact from '@/components/our-farm/SocialEnvironmentalImpact';
+import GrowthExpansion from '@/components/our-farm/GrowthExpansion';
 
 export default function OurFarm() {
   return (
