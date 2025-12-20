@@ -65,3 +65,4 @@ export function getLocalizedProducts(
 ): LocalizedProduct[] {
   return products.map((product) => getLocalizedProduct(product, language));
 }
+

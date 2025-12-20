@@ -41,3 +41,4 @@ ORDER BY table_name;
 -- DROP TABLE IF EXISTS public.mission_vision_section_header CASCADE;
 
 -- Note: CASCADE will also drop dependent objects like policies, indexes, etc.
+

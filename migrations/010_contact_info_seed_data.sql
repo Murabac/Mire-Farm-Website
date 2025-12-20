@@ -24,3 +24,4 @@ INSERT INTO mire_farm_website.contact_info (
     TRUE
   )
 ON CONFLICT DO NOTHING;
+

@@ -54,3 +54,4 @@ export function getLocalizedContactInfo(
     hours: hours,
   };
 }
+

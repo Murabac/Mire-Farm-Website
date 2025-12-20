@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Language } from '@/types/hero';
 
 // Bell Icon Component
 const Bell = ({ className }: { className?: string }) => (
@@ -17,8 +19,36 @@ const ArrowRight = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Newsletter translations
+const newsletterTranslations = {
+  en: {
+    title: 'Stay Updated! 📬',
+    description: 'Subscribe to our newsletter to receive the latest news and updates from Mire Farms delivered straight to your inbox',
+    emailPlaceholder: 'Enter your email address',
+    subscribeButton: 'Subscribe',
+    subscriberCount: '✨ Join 500+ subscribers who get our monthly updates',
+  },
+  so: {
+    title: 'La Soco! 📬',
+    description: 'Iska diiwaan geli wararka aanu soo dirayno si aad u hesho wararka ugu dambeeyay ee Beeraha Mire oo toos ugu yimaada sanduuqaaga',
+    emailPlaceholder: 'Geli ciwaanka emaylkaaga',
+    subscribeButton: 'Iska diiwaan geli',
+    subscriberCount: '✨ Ku biir 500+ iska diiwaangelayaasha oo hela warbixinnada bishii kasta',
+  },
+  ar: {
+    title: 'ابق على اطلاع! 📬',
+    description: 'اشترك في نشرتنا الإخبارية لتلقي آخر الأخبار والتحديثات من مزرعة مير مباشرة إلى بريدك الوارد',
+    emailPlaceholder: 'أدخل عنوان بريدك الإلكتروني',
+    subscribeButton: 'اشترك',
+    subscriberCount: '✨ انضم إلى أكثر من 500 مشترك يحصلون على تحديثاتنا الشهرية',
+  },
+};
+
 export default function NewsletterSignup() {
+  const { language } = useLanguage();
   const [email, setEmail] = useState('');
+
+  const translations = newsletterTranslations[language] || newsletterTranslations.en;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,14 +63,14 @@ export default function NewsletterSignup() {
         <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-full mb-3 md:mb-4">
           <Bell className="w-6 h-6 md:w-8 md:h-8" />
         </div>
-        <h2 className="text-2xl md:text-3xl lg:text-4xl mb-3 md:mb-4">Stay Updated! 📬</h2>
+        <h2 className="text-2xl md:text-3xl lg:text-4xl mb-3 md:mb-4">{translations.title}</h2>
         <p className="text-base md:text-lg mb-4 md:mb-6 leading-relaxed px-2">
-          Subscribe to our newsletter to receive the <strong>latest news and updates</strong> from Mire Farms delivered straight to your inbox
+          {translations.description}
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 md:gap-3 max-w-lg mx-auto px-2">
           <input
             type="email"
-            placeholder="Enter your email address"
+            placeholder={translations.emailPlaceholder}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -50,12 +80,12 @@ export default function NewsletterSignup() {
             type="submit"
             className="group bg-white text-[#6B9E3E] px-5 md:px-6 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg text-sm md:text-base font-medium whitespace-nowrap flex items-center justify-center gap-2"
           >
-            Subscribe
+            {translations.subscribeButton}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </form>
         <p className="text-xs text-green-100 mt-3 md:mt-4">
-          ✨ Join 500+ subscribers who get our monthly updates
+          {translations.subscriberCount}
         </p>
       </div>
     </section>

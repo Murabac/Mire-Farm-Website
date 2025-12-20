@@ -37,3 +37,4 @@ CREATE POLICY "Contact info is viewable by everyone"
 
 -- Create index for active status
 CREATE INDEX IF NOT EXISTS idx_contact_info_active ON mire_farm_website.contact_info(active);
+

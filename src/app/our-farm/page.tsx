@@ -3,26 +3,59 @@ import BusinessModel from '@/components/our-farm/BusinessModel';
 import ProduceTypes from '@/components/our-farm/ProduceTypes';
 import SocialEnvironmentalImpact from '@/components/our-farm/SocialEnvironmentalImpact';
 import GrowthExpansion from '@/components/our-farm/GrowthExpansion';
+import {
+  getBusinessModel,
+  getBusinessModelFeatures,
+  getProduceTypesHeader,
+  getProduceItems,
+  getSocialImpactHeader,
+  getSocialImpactCards,
+  getEnvironmentalCommitment,
+  getGrowthExpansionHeader,
+  getGrowthExpansionPlans,
+  getGrowthExpansionStats,
+} from '@/lib/our-farm-helpers';
+import { getPageHeaderByRoute } from '@/lib/page-header-helpers';
+import { BusinessModel as BusinessModelType, BusinessModelFeature } from '@/types/our-farm';
+import { ProduceTypesHeader, ProduceItem } from '@/types/our-farm';
+import { SocialImpactHeader, SocialImpactCard, EnvironmentalCommitment } from '@/types/our-farm';
+import { GrowthExpansionHeader, GrowthExpansionPlan, GrowthExpansionStat } from '@/types/our-farm';
 
-export default function OurFarm() {
+export default async function OurFarm() {
+  // Fetch page header data server-side for instant rendering
+  const pageHeaderData = await getPageHeaderByRoute('/our-farm');
+  const businessModelData: BusinessModelType | null = await getBusinessModel();
+  const businessModelFeaturesData: BusinessModelFeature[] = await getBusinessModelFeatures();
+  const produceTypesHeaderData: ProduceTypesHeader | null = await getProduceTypesHeader();
+  const produceItemsData: ProduceItem[] = await getProduceItems();
+  const socialImpactHeaderData: SocialImpactHeader | null = await getSocialImpactHeader();
+  const socialImpactCardsData: SocialImpactCard[] = await getSocialImpactCards();
+  const environmentalCommitmentData: EnvironmentalCommitment | null = await getEnvironmentalCommitment();
+  const growthExpansionHeaderData: GrowthExpansionHeader | null = await getGrowthExpansionHeader();
+  const growthExpansionPlansData: GrowthExpansionPlan[] = await getGrowthExpansionPlans();
+  const growthExpansionStatsData: GrowthExpansionStat[] = await getGrowthExpansionStats();
+
   return (
     <main>
-      <PageHeader
-        badge={{
-          text: 'Sustainable Agriculture Excellence',
-        }}
-        title="Our Farm 🌾"
-        description={
-          <>
-            Learn about our <span className="text-[#6B9E3E] font-semibold">sustainable farming practices</span> and 
-            commitment to <span className="text-[#6B9E3E] font-semibold">excellence</span>
-          </>
-        }
+      <PageHeader data={pageHeaderData} />
+      <BusinessModel 
+        businessModelData={businessModelData}
+        featuresData={businessModelFeaturesData}
       />
-      <BusinessModel />
-      <ProduceTypes />
-      <SocialEnvironmentalImpact />
-      <GrowthExpansion />
+      <ProduceTypes 
+        headerData={produceTypesHeaderData}
+        produceItemsData={produceItemsData}
+      />
+      <SocialEnvironmentalImpact 
+        headerData={socialImpactHeaderData}
+        cardsData={socialImpactCardsData}
+        commitmentData={environmentalCommitmentData}
+      />
+      <GrowthExpansion 
+        headerData={growthExpansionHeaderData}
+        plansData={growthExpansionPlansData}
+        statsData={growthExpansionStatsData}
+      />
     </main>
   );
 }

@@ -42,3 +42,4 @@ ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT TRUE;
 -- Create index for display_order and active
 CREATE INDEX IF NOT EXISTS idx_products_display_order ON mire_farm_website.products(display_order);
 CREATE INDEX IF NOT EXISTS idx_products_active ON mire_farm_website.products(active);
+

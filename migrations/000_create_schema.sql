@@ -32,3 +32,4 @@ GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
 -- 1. Go to Supabase Dashboard > Settings > API
 -- 2. Add 'mire_farm_website' to the "Exposed schemas" list
 -- 3. Save the settings
+

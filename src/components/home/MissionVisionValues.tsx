@@ -79,7 +79,7 @@ export default function MissionVisionValues({
   };
 
   const fallbackMvv: LocalizedMissionVisionValue[] = [
-    {
+  {
       id: 1,
       type: 'mission',
       emoji: '🌱',
@@ -111,33 +111,33 @@ export default function MissionVisionValues({
   const fallbackCoreValues: LocalizedCoreValue[] = [
     {
       id: 1,
-      title: '100% Organic',
-      description: 'Delivering the finest organic produce with uncompromising standards.',
+    title: '100% Organic',
+    description: 'Delivering the finest organic produce with uncompromising standards.',
       icon_type: 'organic',
       color_class: 'bg-green-100 text-green-600',
-    },
-    {
+  },
+  {
       id: 2,
-      title: 'Community First',
-      description: 'Supporting local communities and building lasting relationships.',
+    title: 'Community First',
+    description: 'Supporting local communities and building lasting relationships.',
       icon_type: 'community',
       color_class: 'bg-blue-100 text-blue-600',
-    },
-    {
+  },
+  {
       id: 3,
-      title: 'Regional Leader',
-      description: 'Setting standards for sustainable agriculture in the Horn of Africa.',
+    title: 'Regional Leader',
+    description: 'Setting standards for sustainable agriculture in the Horn of Africa.',
       icon_type: 'leader',
       color_class: 'bg-purple-100 text-purple-600',
-    },
-    {
+  },
+  {
       id: 4,
-      title: 'Sustainable Growth',
-      description: 'Committed to eco-friendly practices that preserve our land for future generations.',
+    title: 'Sustainable Growth',
+    description: 'Committed to eco-friendly practices that preserve our land for future generations.',
       icon_type: 'growth',
       color_class: 'bg-orange-100 text-orange-600',
-    },
-  ];
+  },
+];
 
   const finalHeader = sectionHeader ? header : fallbackHeader;
   const finalMvv = mvvItems.length > 0 ? mvvItems : fallbackMvv;
@@ -160,10 +160,10 @@ export default function MissionVisionValues({
             >
               <div className="text-5xl mb-4">{item.emoji}</div>
               <h3 className="text-2xl text-[#2C5F2D] mb-4">{item.title}</h3>
-              <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-lg text-gray-700 leading-relaxed">
                 {item.description}
-              </p>
-            </div>
+            </p>
+          </div>
           ))}
         </div>
 
@@ -178,10 +178,10 @@ export default function MissionVisionValues({
               >
                 <div className={`inline-flex items-center justify-center w-20 h-20 ${value.color_class} rounded-full mb-4`}>
                   <IconComponent className="w-10 h-10" />
-                </div>
-                <h3 className="text-xl text-[#2C5F2D] mb-3">{value.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{value.description}</p>
               </div>
+              <h3 className="text-xl text-[#2C5F2D] mb-3">{value.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{value.description}</p>
+            </div>
             );
           })}
         </div>
