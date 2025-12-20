@@ -1,6 +1,9 @@
-import { NewsArticle } from '@/components/news/NewsArticleCard';
+import { LocalizedNewsArticle } from '@/types/news';
 
-export const newsArticles: NewsArticle[] = [
+// Fallback news articles data (for when database is not available)
+// Note: This file is kept for backward compatibility but is no longer used
+// as news articles are now fetched from the database
+export const newsArticles: LocalizedNewsArticle[] = [
   {
     id: 1,
     title: 'Regional Agriculture Officials Visit Mire Farms',
@@ -40,8 +43,8 @@ export const newsArticles: NewsArticle[] = [
     date: 'October 30, 2024',
     author: 'Farm Operations',
     image: '/images/gellary-4.jpg',
-    excerpt: 'This season&apos;s harvest exceeded expectations, demonstrating the effectiveness of our sustainable farming methods and dedicated team.',
-    content: 'Thanks to favorable weather conditions and our improved organic farming techniques, this harvest season has been our most successful to date. We&apos;ve seen significant increases in both yield and quality across all our crops.',
+    excerpt: 'This season\'s harvest exceeded expectations, demonstrating the effectiveness of our sustainable farming methods and dedicated team.',
+    content: 'Thanks to favorable weather conditions and our improved organic farming techniques, this harvest season has been our most successful to date. We\'ve seen significant increases in both yield and quality across all our crops.',
     emoji: '🌾',
     badge: 'Milestone'
   },
@@ -63,14 +66,14 @@ export const newsArticles: NewsArticle[] = [
     author: 'Farm Management',
     image: '/images/gellary-6.jpg',
     excerpt: 'Reflecting on a successful first year of operation and looking forward to continued growth and community impact.',
-    content: 'Since establishing our farm in 2024, we&apos;ve achieved remarkable milestones including successful harvests, market expansion, and positive community impact. We&apos;re grateful for the support of our community and excited for what the future holds.',
+    content: 'Since establishing our farm in 2024, we\'ve achieved remarkable milestones including successful harvests, market expansion, and positive community impact. We\'re grateful for the support of our community and excited for what the future holds.',
     emoji: '🎉',
     badge: 'Anniversary'
   },
 ];
 
 // Function to get article by ID
-export function getArticleById(id: string | number): NewsArticle | undefined {
+export function getArticleById(id: string | number): LocalizedNewsArticle | undefined {
   const articleId = typeof id === 'string' ? parseInt(id) : id;
   return newsArticles.find(article => article.id === articleId);
 }
