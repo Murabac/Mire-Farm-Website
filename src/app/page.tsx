@@ -10,8 +10,12 @@ import {
   getMissionVisionValues,
   getCoreValues,
 } from '@/lib/mission-vision-helpers';
+import { getProducts } from '@/lib/products-helpers';
+import { getContactInfo } from '@/lib/contact-helpers';
 import { HeroSection } from '@/types/hero';
 import { Benefit } from '@/types/benefits';
+import { Product } from '@/types/products';
+import { ContactInfo } from '@/types/contact';
 
 export default async function Home() {
   // Fetch hero section data from database
@@ -26,6 +30,12 @@ export default async function Home() {
   const missionVisionValues = await getMissionVisionValues();
   const coreValues = await getCoreValues();
 
+  // Fetch products data from database
+  const productsData: Product[] = await getProducts();
+
+  // Fetch contact information from database
+  const contactInfoData: ContactInfo | null = await getContactInfo();
+
   return (
     <main>
       <Hero heroSectionData={heroData} />
@@ -35,8 +45,8 @@ export default async function Home() {
         missionVisionValues={missionVisionValues}
         coreValues={coreValues}
       />
-      <ProductsOverview />
-      <ContactSection />
+      <ProductsOverview productsData={productsData} />
+      <ContactSection contactInfoData={contactInfoData} />
     </main>
   );
 }

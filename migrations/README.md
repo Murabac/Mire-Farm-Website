@@ -36,6 +36,21 @@ Creates tables for mission, vision, values section:
 ### 005_mission_vision_seed_data.sql
 Inserts initial seed data for mission, vision, and values with English, Somali, and Arabic translations.
 
+### 006_cleanup_public_schema.sql
+Optional cleanup script to remove duplicate tables from the public schema if they exist. Only run this if you have duplicate tables and want to keep only the `mire_farm_website` schema tables.
+
+### 007_update_products_multilang.sql
+Updates the products table to include multi-language support for name and description fields. Adds `display_order` and `active` columns for better product management.
+
+### 008_products_seed_data.sql
+Inserts initial seed data for products with English, Somali, and Arabic translations.
+
+### 009_contact_info.sql
+Creates the contact_info table to store dynamic contact information (location, phone, email, hours) with multi-language support.
+
+### 010_contact_info_seed_data.sql
+Inserts initial seed data for contact information with English, Somali, and Arabic translations.
+
 ## Running Migrations
 
 1. **Initial Setup**: Run migrations in order:
@@ -45,13 +60,18 @@ Inserts initial seed data for mission, vision, and values with English, Somali, 
    -- Then, run 002_seed_data.sql
    -- Then, run 003_benefits_section.sql
    -- Then, run 004_mission_vision_values.sql
-   -- Finally, run 005_mission_vision_seed_data.sql
+   -- Then, run 005_mission_vision_seed_data.sql
+   -- Then, run 007_update_products_multilang.sql
+   -- Then, run 008_products_seed_data.sql
+   -- Then, run 009_contact_info.sql
+   -- Finally, run 010_contact_info_seed_data.sql
    ```
 
 2. **In Supabase Dashboard**:
    - Go to SQL Editor
    - Copy and paste the contents of each migration file
-   - Run them in order (000, then 001, then 002, then 003, then 004, then 005)
+   - Run them in order (000, 001, 002, 003, 004, 005, 007, 008, 009, 010)
+   - **Note:** Skip 006 unless you need to clean up duplicate tables from public schema
 
 ## Migration Naming Convention
 
@@ -62,7 +82,12 @@ Migrations are named with a three-digit prefix followed by an underscore and a d
 - `003_benefits_section.sql`
 - `004_mission_vision_values.sql`
 - `005_mission_vision_seed_data.sql`
-- `006_add_new_feature.sql` (future migrations)
+- `006_cleanup_public_schema.sql` - Optional cleanup
+- `007_update_products_multilang.sql`
+- `008_products_seed_data.sql`
+- `009_contact_info.sql`
+- `010_contact_info_seed_data.sql`
+- `011_add_new_feature.sql` (future migrations)
 
 This ensures migrations run in the correct order.
 
