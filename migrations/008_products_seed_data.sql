@@ -42,3 +42,4 @@ INSERT INTO mire_farm_website.products (
     TRUE
   )
 ON CONFLICT DO NOTHING;
+

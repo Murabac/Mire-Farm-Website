@@ -20,3 +20,4 @@ export interface LocalizedContactInfo {
   email: string;
   hours: string;
 }
+

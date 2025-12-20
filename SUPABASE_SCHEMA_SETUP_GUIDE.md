@@ -274,3 +274,4 @@ After completing this setup:
 - Your Next.js application should be able to fetch data from Supabase
 
 If you need to add more tables or modify the schema in the future, create new migration files following the naming convention: `006_description.sql`, `007_description.sql`, etc.
+

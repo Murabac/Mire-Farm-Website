@@ -9,3 +9,4 @@ SET search_path TO mire_farm_website, public;
 ALTER TABLE mire_farm_website.products 
 ALTER COLUMN name DROP NOT NULL,
 ALTER COLUMN description DROP NOT NULL;
+

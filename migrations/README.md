@@ -51,6 +51,40 @@ Creates the contact_info table to store dynamic contact information (location, p
 ### 010_contact_info_seed_data.sql
 Inserts initial seed data for contact information with English, Somali, and Arabic translations.
 
+### 011_our_farm_schema.sql
+Creates all tables for the Our Farm page sections with multi-language support:
+- `business_model` - Business model section
+- `business_model_features` - Feature cards (Perfect Location, Direct to Market)
+- `produce_types_header` - Produce section header
+- `produce_items` - List of produce items
+- `social_impact_header` - Social impact section header
+- `social_impact_cards` - Impact cards (4 cards)
+- `environmental_commitment` - Environmental commitment section
+- `growth_expansion_header` - Growth expansion section header
+- `growth_expansion_plans` - Expansion plans (4 plans)
+- `growth_expansion_stats` - Statistics (4 stats)
+
+### 012_our_farm_seed_data.sql
+Inserts initial seed data for all Our Farm page sections with English, Somali, and Arabic translations.
+
+### 013_page_headers_table.sql
+Creates a generic `page_headers` table that can be used across all pages. This table stores page header data (badge, title, description) with multi-language support, identified by `page_route`.
+
+### 014_page_headers_seed_data.sql
+Inserts initial seed data for page headers across all pages (our-farm, news, gallery, products, about, contact) with English, Somali, and Arabic translations.
+
+### 015_gallery_categories_schema.sql
+Creates the `gallery_categories` table for dynamic gallery filter categories with multi-language support. Categories include name, emoji, and display order.
+
+### 016_gallery_categories_seed_data.sql
+Inserts initial seed data for gallery categories (All, Farm Operations, Products, Community) with English, Somali, and Arabic translations.
+
+### 017_update_news_articles_multilang.sql
+Updates the `news_articles` table to support multi-language content. Adds columns for title, excerpt, content, badge, and author in English, Somali, and Arabic. Also adds `active` and `display_order` columns for better article management.
+
+### 018_news_articles_seed_data.sql
+Inserts initial seed data for news articles with English, Somali, and Arabic translations. Includes 6 sample articles covering various topics like official visits, expansion, community programs, harvest milestones, infrastructure improvements, and anniversaries.
+
 ## Running Migrations
 
 1. **Initial Setup**: Run migrations in order:
@@ -64,13 +98,21 @@ Inserts initial seed data for contact information with English, Somali, and Arab
    -- Then, run 007_update_products_multilang.sql
    -- Then, run 008_products_seed_data.sql
    -- Then, run 009_contact_info.sql
-   -- Finally, run 010_contact_info_seed_data.sql
+   -- Then, run 010_contact_info_seed_data.sql
+   -- Then, run 011_our_farm_schema.sql
+   -- Then, run 012_our_farm_seed_data.sql
+   -- Then, run 013_page_headers_table.sql
+   -- Then, run 014_page_headers_seed_data.sql
+   -- Then, run 015_gallery_categories_schema.sql
+   -- Then, run 016_gallery_categories_seed_data.sql
+   -- Then, run 017_update_news_articles_multilang.sql
+   -- Finally, run 018_news_articles_seed_data.sql
    ```
 
 2. **In Supabase Dashboard**:
    - Go to SQL Editor
    - Copy and paste the contents of each migration file
-   - Run them in order (000, 001, 002, 003, 004, 005, 007, 008, 009, 010)
+   - Run them in order (000, 001, 002, 003, 004, 005, 007, 008, 009, 010, 011, 012, 013, 014)
    - **Note:** Skip 006 unless you need to clean up duplicate tables from public schema
 
 ## Migration Naming Convention
@@ -87,7 +129,15 @@ Migrations are named with a three-digit prefix followed by an underscore and a d
 - `008_products_seed_data.sql`
 - `009_contact_info.sql`
 - `010_contact_info_seed_data.sql`
-- `011_add_new_feature.sql` (future migrations)
+- `011_our_farm_schema.sql`
+- `012_our_farm_seed_data.sql`
+- `013_page_headers_table.sql`
+- `014_page_headers_seed_data.sql`
+- `015_gallery_categories_schema.sql`
+- `016_gallery_categories_seed_data.sql`
+- `017_update_news_articles_multilang.sql`
+- `018_news_articles_seed_data.sql`
+- `019_add_new_feature.sql` (future migrations)
 
 This ensures migrations run in the correct order.
 

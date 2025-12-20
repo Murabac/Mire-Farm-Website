@@ -26,3 +26,4 @@ export interface LocalizedProduct {
   in_stock: boolean;
   display_order: number;
 }
+

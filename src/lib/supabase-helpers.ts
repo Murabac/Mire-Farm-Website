@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import { NewsArticle } from '@/components/news/NewsArticleCard';
+import { NewsArticle } from '@/types/news';
 
 /**
  * Example helper functions for working with Supabase

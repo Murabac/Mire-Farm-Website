@@ -39,7 +39,7 @@ export default function Benefits({ benefitsData }: BenefitsProps) {
     { id: 4, text: 'Fresh Daily' },
     { id: 5, text: 'Sustainable' },
     { id: 6, text: 'Quality Assured' },
-  ];
+];
 
   const benefits = localizedBenefits.length > 0 ? localizedBenefits : fallbackBenefits;
 

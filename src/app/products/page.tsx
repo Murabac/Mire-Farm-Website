@@ -1,14 +1,20 @@
-export default function Products() {
+import PageHeader from '@/components/PageHeader';
+import { getPageHeaderByRoute } from '@/lib/page-header-helpers';
+
+export default async function Products() {
+  // Fetch page header data server-side for instant rendering
+  const pageHeaderData = await getPageHeaderByRoute('/products');
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          Our Products
-        </h1>
-        <p className="text-center text-lg">
-          Discover our fresh farm products and offerings.
-        </p>
-      </div>
+    <main>
+      <PageHeader data={pageHeaderData} />
+      <section className="py-12 md:py-16 px-4 bg-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-lg text-gray-600">
+            Products page content coming soon...
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
