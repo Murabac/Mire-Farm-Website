@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 // Calendar Icon Component
 const Calendar = ({ className }: { className?: string }) => (
@@ -36,8 +37,9 @@ interface NewsArticleCardProps {
 
 export default function NewsArticleCard({ article }: NewsArticleCardProps) {
   return (
-    <article className="bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-100">
-      <div className="grid md:grid-cols-5 gap-0">
+    <Link href={`/news/${article.id}`}>
+      <article className="bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-100 cursor-pointer">
+        <div className="grid md:grid-cols-5 gap-0">
         <div className="md:col-span-2 h-64 md:h-auto relative overflow-hidden group">
           <Image
             src={article.image}
@@ -70,6 +72,7 @@ export default function NewsArticleCard({ article }: NewsArticleCardProps) {
         </div>
       </div>
     </article>
+    </Link>
   );
 }
 

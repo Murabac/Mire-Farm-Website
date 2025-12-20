@@ -19,6 +19,7 @@ The Mire Farms website is designed to provide visitors with information about th
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
+- **Database**: Supabase (PostgreSQL)
 - **Linting**: ESLint
 
 ## Getting Started
@@ -35,12 +36,20 @@ The Mire Farms website is designed to provide visitors with information about th
 npm install
 ```
 
-2. Run the development server:
+2. Set up Supabase (optional but recommended):
+   - See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions
+   - Create a `.env.local` file in the root directory with your Supabase credentials:
+     ```env
+     NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+     ```
+
+3. Run the development server:
 ```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the website.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the website.
 
 ### Build for Production
 
@@ -65,7 +74,9 @@ mire-farm-website/
 │   │   ├── Header.tsx      # Site header/navigation
 │   │   └── Footer.tsx      # Site footer
 │   ├── lib/                # Utility functions
-│   │   └── utils.ts        # Helper utilities
+│   │   ├── utils.ts        # Helper utilities
+│   │   ├── supabase.ts     # Supabase client configuration
+│   │   └── supabase-helpers.ts  # Supabase helper functions
 │   ├── types/              # TypeScript type definitions
 │   ├── hooks/              # Custom React hooks
 │   └── styles/             # Additional stylesheets
@@ -76,6 +87,23 @@ mire-farm-website/
 ├── next.config.js
 └── README.md
 ```
+
+## Database Setup
+
+This project uses Supabase as the database backend. To set up the database:
+
+1. Follow the instructions in [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+2. Run the migrations from the `migrations/` folder in your Supabase SQL Editor (in order: 001, then 002)
+3. Configure your environment variables in `.env.local`
+
+See `migrations/README.md` for details about the migration files.
+
+The database schema includes tables for:
+- News articles
+- Contact form submissions
+- Newsletter subscriptions
+- Products (optional)
+- Gallery images (optional)
 
 ## License
 
