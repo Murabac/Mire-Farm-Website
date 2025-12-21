@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, Mail, CheckCircle, XCircle, Trash2, Calendar, Download } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,11 +24,7 @@ export default function SubscribersPage() {
     unsubscribed: 0,
   });
 
-  useEffect(() => {
-    fetchSubscribers();
-  }, [filter, searchTerm]);
-
-  const fetchSubscribers = async () => {
+  const fetchSubscribers = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -51,15 +47,17 @@ export default function SubscribersPage() {
           subscribed: data.subscribed || 0,
           unsubscribed: data.unsubscribed || 0,
         });
-      } else {
-        console.error('Failed to fetch subscribers');
       }
     } catch (error) {
-      console.error('Error fetching subscribers:', error);
+      // Silently handle errors
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, searchTerm]);
+
+  useEffect(() => {
+    fetchSubscribers();
+  }, [fetchSubscribers]);
 
   const handleToggleSubscription = async (id: string, currentStatus: boolean) => {
     try {

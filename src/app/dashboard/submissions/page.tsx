@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, Mail, MessageSquare, Calendar, CheckCircle, XCircle, Trash2, Eye, EyeOff } from 'lucide-react';
 
 interface ContactSubmission {
@@ -26,11 +26,7 @@ export default function SubmissionsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [submissionToDelete, setSubmissionToDelete] = useState<ContactSubmission | null>(null);
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, [filter, searchTerm]);
-
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -53,15 +49,17 @@ export default function SubmissionsPage() {
           read: data.read || 0,
           unread: data.unread || 0,
         });
-      } else {
-        console.error('Failed to fetch submissions');
       }
     } catch (error) {
-      console.error('Error fetching submissions:', error);
+      // Silently handle errors
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, searchTerm]);
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
 
   const handleMarkAsRead = async (id: string, currentStatus: boolean) => {
     try {

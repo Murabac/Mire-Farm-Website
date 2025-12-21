@@ -11,9 +11,12 @@ const languages: { code: Language; name: string; flag: string }[] = [
 ];
 
 export default function LanguageSwitcher() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, enabledLanguages } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Filter languages to only show enabled ones
+  const availableLanguages = languages.filter(lang => enabledLanguages.includes(lang.code));
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -32,7 +35,8 @@ export default function LanguageSwitcher() {
     };
   }, [isOpen]);
 
-  const currentLanguage = languages.find(l => l.code === language);
+  // Only show current language if it's in available languages, otherwise use first available
+  const currentLanguage = availableLanguages.find(l => l.code === language) || availableLanguages[0] || languages.find(l => l.code === language);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -57,10 +61,10 @@ export default function LanguageSwitcher() {
         </svg>
       </button>
       
-      {isOpen && (
+      {isOpen && availableLanguages.length > 0 && (
         <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
           <div className="py-1">
-            {languages.map((lang) => (
+            {availableLanguages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => {
