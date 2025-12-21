@@ -242,7 +242,7 @@ export function BenefitsEditor() {
             <div className="space-y-4">
               {benefits.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <p>No benefits yet. Click "Add Benefit" to get started.</p>
+                  <p>No benefits yet. Click &quot;Add Benefit&quot; to get started.</p>
                 </div>
               ) : (
                 benefits.map((benefit, index) => {

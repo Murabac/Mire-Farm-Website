@@ -504,7 +504,7 @@ export function HeroEditor() {
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#6B9E3E] text-black"
               placeholder="Est. 2024 - Organic Farm"
             />
-            <p className="text-xs text-gray-500 mt-2">Use " - " to separate title and subtitle</p>
+            <p className="text-xs text-gray-500 mt-2">Use &quot; - &quot; to separate title and subtitle</p>
           </div>
 
           {/* Hero Image */}
