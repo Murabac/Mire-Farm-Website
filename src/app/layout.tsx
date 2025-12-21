@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import TopBar from "@/components/TopBar";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ConditionalLayout from "@/components/ConditionalLayout";
 
 export const metadata: Metadata = {
   title: "Mire Farms",
@@ -19,10 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="flex flex-col min-h-screen">
         <LanguageProvider>
-        <TopBar />
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+          <AuthProvider>
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>
