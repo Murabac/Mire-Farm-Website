@@ -2,12 +2,15 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
+  const router = useRouter();
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -57,13 +60,32 @@ export default function Header() {
             ))}
           </ul>
 
-          {/* Contact Us Button */}
-          <Link
-            href="/#contact"
-            className="hidden md:block bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
-          >
-            Contact Us
-          </Link>
+          {/* Auth Buttons / Contact Us */}
+          <div className="hidden md:flex items-center gap-3">
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="text-gray-700 hover:text-green-600 font-medium transition-colors duration-200"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/#contact"
+                className="bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+              >
+                Contact Us
+              </Link>
+            )}
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -108,15 +130,40 @@ export default function Header() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <Link
-                  href="/#contact"
-                  className="block bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200 text-center mt-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Contact Us
-                </Link>
-              </li>
+              {user ? (
+                <>
+                  <li>
+                    <Link
+                      href="/dashboard"
+                      className="block bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200 text-center mt-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-gray-700 hover:text-green-600 font-medium transition-colors duration-200 py-2 text-center mt-2"
+                    >
+                      Sign Out
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <Link
+                    href="/#contact"
+                    className="block bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200 text-center mt-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Contact Us
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         )}

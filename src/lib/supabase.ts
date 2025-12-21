@@ -23,12 +23,16 @@ export const isSupabaseConfigured = () => {
 };
 
 // Server-side Supabase client (for use in API routes and server components)
+// For custom auth, we can use service role key for better security (optional)
+// If SERVICE_ROLE_KEY is set, it will be used; otherwise, anon key is used
 export const createServerClient = () => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  // Use service role key if available (more secure for server-side operations)
+  // Otherwise fall back to anon key
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   
   if (!url || !key) {
-    throw new Error('Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
+    throw new Error('Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or SUPABASE_SERVICE_ROLE_KEY) in your .env.local file.');
   }
   
   return createClient(url, key, {
