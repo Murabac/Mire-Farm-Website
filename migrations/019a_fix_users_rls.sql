@@ -11,6 +11,7 @@ DROP POLICY IF EXISTS "Users can update own profile" ON mire_farm_website.users;
 DROP POLICY IF EXISTS "Allow user registration" ON mire_farm_website.users;
 DROP POLICY IF EXISTS "Allow user lookup" ON mire_farm_website.users;
 DROP POLICY IF EXISTS "Allow user updates" ON mire_farm_website.users;
+DROP POLICY IF EXISTS "Allow user deletes" ON mire_farm_website.users;
 
 -- Create new policies for custom authentication
 -- These policies allow the API routes (using anon key) to insert and select users
@@ -32,5 +33,11 @@ CREATE POLICY "Allow user lookup"
 CREATE POLICY "Allow user updates"
     ON mire_farm_website.users
     FOR UPDATE
+    USING (true);
+
+-- Allow deletes for user management (handled by API routes with proper authentication)
+CREATE POLICY "Allow user deletes"
+    ON mire_farm_website.users
+    FOR DELETE
     USING (true);
 

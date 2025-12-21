@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedContactInfo } from '@/lib/contact-helpers';
 import { ContactInfo, LocalizedContactInfo } from '@/types/contact';
-import { submitContactForm } from '@/lib/supabase-helpers';
 
 interface ContactSectionProps {
   contactInfoData: ContactInfo | null;
@@ -81,6 +80,7 @@ export default function ContactSection({ contactInfoData }: ContactSectionProps)
   const { language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const formRef = useRef<HTMLFormElement>(null);
 
   const text = staticText[language] || staticText.en;
 
@@ -100,12 +100,22 @@ export default function ContactSection({ contactInfoData }: ContactSectionProps)
     const message = formData.get('message') as string;
 
     try {
-      const result = await submitContactForm({ name, email, message });
-      
-      if (result.success) {
+      const response = await fetch('/api/contact/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, message }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
         setSubmitStatus('success');
         // Reset form
-        e.currentTarget.reset();
+        if (formRef.current) {
+          formRef.current.reset();
+        }
         // Clear success message after 5 seconds
         setTimeout(() => setSubmitStatus('idle'), 5000);
       } else {
@@ -158,7 +168,7 @@ export default function ContactSection({ contactInfoData }: ContactSectionProps)
 
           {/* Contact Form */}
           <div className="bg-white rounded-2xl p-8 shadow-2xl">
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form ref={formRef} className="space-y-5" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="name" className="block text-gray-700 mb-2 text-lg">{text.nameLabel}</label>
                 <input

@@ -47,14 +47,39 @@ const newsletterTranslations = {
 export default function NewsletterSignup() {
   const { language } = useLanguage();
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const translations = newsletterTranslations[language] || newsletterTranslations.en;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle newsletter subscription here
-    console.log('Subscribing:', email);
-    setEmail('');
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: data.message || 'Successfully subscribed!' });
+        setEmail('');
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to subscribe. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      setMessage({ type: 'error', text: 'An error occurred. Please try again later.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,18 +97,41 @@ export default function NewsletterSignup() {
             type="email"
             placeholder={translations.emailPlaceholder}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setMessage(null);
+            }}
             required
-            className="flex-1 px-4 md:px-5 py-2.5 md:py-3 border-2 border-white/30 bg-white/10 backdrop-blur-sm rounded-full focus:outline-none focus:border-white text-white placeholder-white/70 text-sm md:text-base"
+            disabled={loading}
+            className="flex-1 px-4 md:px-5 py-2.5 md:py-3 border-2 border-white/30 bg-white/10 backdrop-blur-sm rounded-full focus:outline-none focus:border-white text-white placeholder-white/70 text-sm md:text-base disabled:opacity-50"
           />
           <button
             type="submit"
-            className="group bg-white text-[#6B9E3E] px-5 md:px-6 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg text-sm md:text-base font-medium whitespace-nowrap flex items-center justify-center gap-2"
+            disabled={loading}
+            className="group bg-white text-[#6B9E3E] px-5 md:px-6 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg text-sm md:text-base font-medium whitespace-nowrap flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            {translations.subscribeButton}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-[#6B9E3E] border-t-transparent rounded-full animate-spin"></div>
+                <span>Subscribing...</span>
+              </>
+            ) : (
+              <>
+                {translations.subscribeButton}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </button>
         </form>
+        {message && (
+          <div className={`mt-4 px-4 py-2 rounded-lg text-sm max-w-lg mx-auto ${
+            message.type === 'success' 
+              ? 'bg-green-100 text-green-800 border border-green-200' 
+              : 'bg-red-100 text-red-800 border border-red-200'
+          }`}>
+            {message.text}
+          </div>
+        )}
         <p className="text-xs text-green-100 mt-3 md:mt-4">
           {translations.subscriberCount}
         </p>

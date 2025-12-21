@@ -70,6 +70,12 @@ CREATE POLICY "Allow user updates"
     FOR UPDATE
     USING (true);
 
+-- Allow deletes for user management (handled by API routes with proper authentication)
+CREATE POLICY "Allow user deletes"
+    ON mire_farm_website.users
+    FOR DELETE
+    USING (true);
+
 -- Note: For better security in production, consider:
 -- 1. Using service role key in API routes instead of anon key
 -- 2. Creating more restrictive RLS policies based on your needs

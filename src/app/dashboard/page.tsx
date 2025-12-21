@@ -1,122 +1,143 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import Link from 'next/link';
 
-// Dashboard translations
-const dashboardTranslations = {
-  en: {
-    title: 'Dashboard',
-    welcome: 'Welcome to your dashboard',
-    loading: 'Loading...',
-    redirecting: 'Redirecting to login...',
-  },
-  so: {
-    title: 'Dashboard',
-    welcome: 'Ku soo dhawoow dashboardkaaga',
-    loading: 'Waa la soo gelinayaa...',
-    redirecting: 'Waa la wadi doonaa galitaanka...',
-  },
-  ar: {
-    title: 'لوحة التحكم',
-    welcome: 'مرحباً بك في لوحة التحكم',
-    loading: 'جارٍ التحميل...',
-    redirecting: 'جارٍ إعادة التوجيه إلى تسجيل الدخول...',
-  },
-};
+interface DashboardStats {
+  users: number;
+  submissions: number;
+  subscribers: number;
+  newsArticles: number;
+}
 
 export default function DashboardPage() {
-  const { user, loading, signOut } = useAuth();
-  const { language } = useLanguage();
-  const router = useRouter();
-
-  const translations = dashboardTranslations[language] || dashboardTranslations.en;
+  const { user } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({
+    users: 0,
+    submissions: 0,
+    subscribers: 0,
+    newsArticles: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    fetchStats();
+    // Refresh stats every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/admin/stats', {
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to fetch stats:', errorData);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [user, loading, router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#E8F5E9] via-white to-[#F1F8E9]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#6B9E3E] mb-4"></div>
-          <p className="text-gray-600">{translations.loading}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#E8F5E9] via-white to-[#F1F8E9]">
-        <div className="text-center">
-          <p className="text-gray-600">{translations.redirecting}</p>
-        </div>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E8F5E9] via-white to-[#F1F8E9] py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600 mt-1">Welcome back, {user?.name || user?.email}!</p>
+      </div>
+
+      {/* Dashboard Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <Link href="/dashboard/users" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#2C5F2D] mb-2">
-                {translations.title}
-              </h1>
-              <p className="text-gray-600">
-                {translations.welcome}, {user.email}
+              <p className="text-sm font-medium text-gray-600">Total Users</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {loading ? '...' : stats.users}
               </p>
             </div>
-            <button
-              onClick={() => signOut()}
-              className="px-6 py-2.5 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-
-        {/* Dashboard Content */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-          <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-[#6B9E3E]/10 rounded-full mb-6">
-              <svg
-                className="w-10 h-10 text-[#6B9E3E]"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-semibold text-[#2C5F2D] mb-4">
-              Authentication Successful!
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Your dashboard is ready. This is a blank page for testing authentication.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-6 text-left max-w-2xl mx-auto">
-              <h3 className="font-semibold text-gray-800 mb-3">User Information:</h3>
-              <div className="space-y-2 text-sm text-gray-600">
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>User ID:</strong> {user.id}</p>
-                <p><strong>Name:</strong> {user.name || 'Not set'}</p>
-                <p><strong>Email Verified:</strong> {user.email_verified ? 'Yes' : 'No'}</p>
-                {user.created_at && (
-                  <p><strong>Created:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
-                )}
-              </div>
+          </div>
+        </Link>
+
+        <Link href="/dashboard/news" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">News Articles</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {loading ? '...' : stats.newsArticles}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
             </div>
           </div>
+        </Link>
+
+        <Link href="/dashboard/submissions" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Contact Submissions</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {loading ? '...' : stats.submissions}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/dashboard/subscribers" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Newsletter Subscribers</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {loading ? '...' : stats.subscribers}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#6B9E3E] hover:bg-[#6B9E3E]/5 transition-colors text-left">
+            <h3 className="font-semibold text-gray-900">Add News Article</h3>
+            <p className="text-sm text-gray-600 mt-1">Create a new news article</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#6B9E3E] hover:bg-[#6B9E3E]/5 transition-colors text-left">
+            <h3 className="font-semibold text-gray-900">Manage Products</h3>
+            <p className="text-sm text-gray-600 mt-1">Update product information</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#6B9E3E] hover:bg-[#6B9E3E]/5 transition-colors text-left">
+            <h3 className="font-semibold text-gray-900">View Submissions</h3>
+            <p className="text-sm text-gray-600 mt-1">Check contact form submissions</p>
+          </button>
         </div>
       </div>
     </div>
