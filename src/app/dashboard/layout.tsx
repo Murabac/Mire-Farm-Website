@@ -19,7 +19,10 @@ import {
   X, 
   Bell, 
   LogOut, 
-  ChevronDown
+  ChevronDown,
+  Home,
+  Tractor,
+  PanelTop
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -29,11 +32,28 @@ const navigation = [
     name: 'Content', 
     icon: Sparkles,
     children: [
-      { name: 'Hero Section', href: '/dashboard/hero' },
-      { name: 'Benefits', href: '/dashboard/benefits' },
-      { name: 'Mission & Vision', href: '/dashboard/mission-vision' },
-      { name: 'Products Overview', href: '/dashboard/products' },
-      { name: 'Contact Info', href: '/dashboard/contact-info' },
+      { 
+        name: 'Home Page', 
+        icon: Home,
+        children: [
+          { name: 'Hero Section', href: '/dashboard/hero' },
+          { name: 'Benefits', href: '/dashboard/benefits' },
+          { name: 'Mission & Vision', href: '/dashboard/mission-vision' },
+          { name: 'Products Overview', href: '/dashboard/products' },
+        ]
+      },
+      { 
+        name: 'Our Farm Page', 
+        icon: Tractor,
+        children: [
+          { name: 'Business Model', href: '/dashboard/our-farm/business-model' },
+          { name: 'Produce Types', href: '/dashboard/our-farm/produce-types' },
+          { name: 'Social Impact', href: '/dashboard/our-farm/social-impact' },
+          { name: 'Growth & Expansion', href: '/dashboard/our-farm/growth-expansion' },
+        ]
+      },
+      { name: 'Contact Info', href: '/dashboard/contact-info', icon: Phone },
+      { name: 'Page Headers', href: '/dashboard/page-headers', icon: PanelTop },
     ]
   },
   { 
@@ -63,7 +83,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [expandedSections, setExpandedSections] = useState<string[]>(['Content', 'News', 'Submissions']);
+  const [expandedSections, setExpandedSections] = useState<string[]>(['Content', 'Home Page', 'Our Farm Page', 'News', 'Submissions']);
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -82,8 +102,12 @@ export default function DashboardLayout({
   };
 
   const isActive = (href: string) => pathname === href;
-  const isParentActive = (children: any[]) => 
-    children.some(child => pathname === child.href);
+  const isParentActive = (children: any[]): boolean => 
+    children.some(child => {
+      if (child.href) return pathname === child.href;
+      if (child.children) return isParentActive(child.children);
+      return false;
+    });
 
   const handleSignOut = async () => {
     await signOut();
@@ -153,19 +177,59 @@ export default function DashboardLayout({
                       <ChevronDown className={`w-4 h-4 transition-transform ${expandedSections.includes(item.name) ? 'rotate-180' : ''}`} />
                     </button>
                     {expandedSections.includes(item.name) && (
-                      <div className="ml-8 mt-1 space-y-1">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.name}
-                            href={child.href}
-                            className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                              isActive(child.href)
-                                ? 'bg-[#6B9E3E] text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                          >
-                            {child.name}
-                          </Link>
+                      <div className="ml-4 mt-1 space-y-1">
+                        {item.children.map((child: any) => (
+                          <div key={child.name}>
+                            {child.children ? (
+                              // Nested section (e.g., Home Page, Our Farm Page)
+                              <div>
+                                <button
+                                  onClick={() => toggleSection(child.name)}
+                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                                    isParentActive(child.children)
+                                      ? 'bg-[#6B9E3E]/10 text-[#6B9E3E]'
+                                      : 'text-gray-600 hover:bg-gray-100'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    {child.icon && <child.icon className="w-4 h-4" />}
+                                    <span className="font-medium">{child.name}</span>
+                                  </div>
+                                  <ChevronDown className={`w-3 h-3 transition-transform ${expandedSections.includes(child.name) ? 'rotate-180' : ''}`} />
+                                </button>
+                                {expandedSections.includes(child.name) && (
+                                  <div className="ml-6 mt-1 space-y-1">
+                                    {child.children.map((subChild: any) => (
+                                      <Link
+                                        key={subChild.name}
+                                        href={subChild.href}
+                                        className={`block px-3 py-1.5 rounded-lg text-xs transition-colors ${
+                                          isActive(subChild.href)
+                                            ? 'bg-[#6B9E3E] text-white'
+                                            : 'text-gray-500 hover:bg-gray-100'
+                                        }`}
+                                      >
+                                        {subChild.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              // Regular link
+                              <Link
+                                href={child.href}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                                  isActive(child.href)
+                                    ? 'bg-[#6B9E3E] text-white'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                              >
+                                {child.icon && <child.icon className="w-4 h-4" />}
+                                {child.name}
+                              </Link>
+                            )}
+                          </div>
                         ))}
                       </div>
                     )}

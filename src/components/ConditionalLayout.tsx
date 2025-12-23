@@ -8,11 +8,12 @@ import Footer from '@/components/Footer';
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
-  // Hide header/footer for auth pages and dashboard
+  // Hide header/footer for auth pages, dashboard, and maintenance page
   const isAuthPage = pathname === '/login' || pathname === '/register';
   const isDashboardPage = pathname?.startsWith('/dashboard');
+  const isMaintenancePage = pathname === '/maintenance';
   
-  if (isAuthPage || isDashboardPage) {
+  if (isAuthPage || isDashboardPage || isMaintenancePage) {
     return <>{children}</>;
   }
 

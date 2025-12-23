@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Plus, Search, Eye, EyeOff, Calendar, User, Newspaper } from 'lucide-react';
@@ -12,11 +12,7 @@ export default function NewslettersListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<string>('all'); // 'all', 'true', 'false'
 
-  useEffect(() => {
-    fetchArticles();
-  }, [filterActive, searchTerm]);
-
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -40,7 +36,11 @@ export default function NewslettersListPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterActive, searchTerm]);
+
+  useEffect(() => {
+    fetchArticles();
+  }, [fetchArticles]);
 
   const formatDate = (dateString: string) => {
     try {

@@ -117,7 +117,7 @@ export default function ProductsOverview({ sectionHeaderData, cardsData }: Produ
         </div>
         <div className="text-center">
           <Link
-            href="/products"
+            href="/our-farm"
             className="group inline-flex items-center gap-2 bg-[#6B9E3E] text-white px-10 py-4 rounded-full hover:bg-[#5a8433] transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-lg font-medium"
           >
             {header.buttonText}

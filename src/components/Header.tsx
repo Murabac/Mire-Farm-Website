@@ -2,22 +2,48 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+
+interface MenuItem {
+  menu_key: string;
+  label: string;
+  href: string;
+  visible: boolean;
+}
+
+const defaultNavLinks: MenuItem[] = [
+  { menu_key: 'home', href: '/', label: 'Home', visible: true },
+  { menu_key: 'our-farm', href: '/our-farm', label: 'Our Farm', visible: true },
+  { menu_key: 'gallery', href: '/gallery', label: 'Gallery', visible: true },
+  { menu_key: 'news', href: '/news', label: 'News', visible: true },
+];
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [navLinks, setNavLinks] = useState<MenuItem[]>(defaultNavLinks);
   const pathname = usePathname();
   const { user, signOut } = useAuth();
-  const router = useRouter();
 
-  const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/our-farm', label: 'Our Farm' },
-    { href: '/gallery', label: 'Gallery' },
-    { href: '/news', label: 'News' },
-  ];
+  useEffect(() => {
+    const fetchMenuSettings = async () => {
+      try {
+        const response = await fetch(`/api/settings/menu?t=${Date.now()}`, {
+          cache: 'no-store',
+        });
+        if (response.ok) {
+          const data: MenuItem[] = await response.json();
+          if (data && Array.isArray(data) && data.length > 0) {
+            setNavLinks(data);
+          }
+        }
+      } catch (error) {
+        // Use default links if fetch fails
+      }
+    };
+    fetchMenuSettings();
+  }, []);
 
   const isActive = (href: string) => {
     if (href === '/') {
@@ -29,9 +55,9 @@ export default function Header() {
   return (
     <header className="w-full bg-white" dir="ltr">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex items-center h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center flex-shrink-0">
             <Image
               src="/images/logo.png"
               alt="Mire Farms Logo"
@@ -42,9 +68,9 @@ export default function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
-          <ul className="hidden md:flex gap-8 items-center">
-            {navLinks.map((link) => (
+          {/* Desktop Navigation - Centered */}
+          <ul className="hidden md:flex flex-1 justify-center gap-8 items-center">
+            {navLinks.filter(link => link.visible).map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
@@ -61,7 +87,7 @@ export default function Header() {
           </ul>
 
           {/* Auth Buttons / Contact Us */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3 flex-shrink-0">
             {user ? (
               <>
                 <Link
@@ -115,7 +141,7 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden pb-4">
             <ul className="flex flex-col gap-4">
-              {navLinks.map((link) => (
+              {navLinks.filter(link => link.visible).map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}

@@ -124,7 +124,7 @@ export function ProductsOverviewEditor() {
             description_ar: card.description_ar || '',
             image: card.image || '',
             display_order: card.display_order,
-          })).sort((a, b) => a.display_order - b.display_order);
+          })).sort((a: CardFormItem, b: CardFormItem) => a.display_order - b.display_order);
           
           // Ensure we have exactly 2 cards
           while (formCards.length < 2) {

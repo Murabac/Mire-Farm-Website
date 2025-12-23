@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Save, Languages, Upload, Newspaper, X, Image as ImageIcon, Calendar, User, Hash, Smile, Eye, EyeOff } from 'lucide-react';
 import { NewsArticle } from '@/types/news';
@@ -78,15 +78,7 @@ export function NewsArticleEditor() {
     { code: 'ar', name: 'Arabic', flag: '🇸🇦' }
   ];
 
-  useEffect(() => {
-    if (isEditing && articleId) {
-      fetchArticle();
-    } else {
-      setLoading(false);
-    }
-  }, [articleId, isEditing]);
-
-  const fetchArticle = async () => {
+  const fetchArticle = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/news/${articleId}`, {
@@ -129,7 +121,15 @@ export function NewsArticleEditor() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [articleId]);
+
+  useEffect(() => {
+    if (isEditing && articleId) {
+      fetchArticle();
+    } else {
+      setLoading(false);
+    }
+  }, [articleId, isEditing, fetchArticle]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
