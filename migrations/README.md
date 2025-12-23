@@ -77,6 +77,10 @@ Inserts initial seed data for page headers across all pages (our-farm, news, gal
 Creates the `gallery_categories` table for dynamic gallery filter categories with multi-language support. Categories include name, emoji, and display order.
 
 ### 016_gallery_categories_seed_data.sql
+Inserts initial seed data for gallery categories with English, Somali, and Arabic translations.
+
+### 024_gallery_images_seed_data.sql
+Inserts initial seed data for gallery images with sample images from the /images folder.
 Inserts initial seed data for gallery categories (All, Farm Operations, Products, Community) with English, Somali, and Arabic translations.
 
 ### 017_update_news_articles_multilang.sql

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Save, Languages, Plus, Trash2, GripVertical, CheckCircle2 } from 'lucide-react';
 import { Benefit } from '@/types/benefits';
 import { Language } from '@/types/hero';
+import { showSuccessAlert, showErrorAlert, showConfirmDialog } from '@/lib/swal';
 
 interface BenefitFormItem {
   id: number | null;
@@ -82,16 +83,16 @@ export function BenefitsEditor() {
       });
 
       if (response.ok) {
-        alert('Benefits saved successfully!');
+        await showSuccessAlert('Benefits saved successfully!');
         // Reload data to get updated IDs for new items
         await fetchBenefitsData();
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`Failed to save: ${errorData.error || 'Unknown error'}`);
+        await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
       }
     } catch (error) {
       console.error('Error saving benefits:', error);
-      alert('Failed to save benefits. Please try again.');
+      await showErrorAlert('Failed to save benefits. Please try again.', 'Error');
     } finally {
       setSaving(false);
     }
@@ -114,8 +115,9 @@ export function BenefitsEditor() {
     setBenefits([...benefits, newBenefit]);
   };
 
-  const handleRemoveBenefit = (index: number) => {
-    if (confirm('Are you sure you want to remove this benefit?')) {
+  const handleRemoveBenefit = async (index: number) => {
+    const confirmed = await showConfirmDialog('Are you sure you want to remove this benefit?');
+    if (confirmed) {
       const newBenefits = benefits.filter((_, i) => i !== index);
       // Reorder remaining benefits
       const reordered = newBenefits.map((benefit, i) => ({

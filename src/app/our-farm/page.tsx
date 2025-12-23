@@ -21,6 +21,10 @@ import { ProduceTypesHeader, ProduceItem } from '@/types/our-farm';
 import { SocialImpactHeader, SocialImpactCard, EnvironmentalCommitment } from '@/types/our-farm';
 import { GrowthExpansionHeader, GrowthExpansionPlan, GrowthExpansionStat } from '@/types/our-farm';
 
+// Ensure fresh data is fetched on each request
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function OurFarm() {
   // Fetch page header data server-side for instant rendering
   const pageHeaderData = await getPageHeaderByRoute('/our-farm');

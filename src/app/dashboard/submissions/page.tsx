@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Search, Mail, MessageSquare, Calendar, CheckCircle, XCircle, Trash2, Eye, EyeOff } from 'lucide-react';
+import { showErrorAlert, showConfirmDialog } from '@/lib/swal';
 
 interface ContactSubmission {
   id: string;
@@ -78,11 +79,11 @@ export default function SubmissionsPage() {
           setSelectedSubmission({ ...selectedSubmission, read: !currentStatus });
         }
       } else {
-        alert('Failed to update submission status');
+        await showErrorAlert('Failed to update submission status', 'Error');
       }
     } catch (error) {
       console.error('Error updating submission:', error);
-      alert('An error occurred');
+      await showErrorAlert('An error occurred', 'Error');
     }
   };
 
@@ -104,11 +105,11 @@ export default function SubmissionsPage() {
         }
         fetchSubmissions();
       } else {
-        alert('Failed to delete submission');
+        await showErrorAlert('Failed to delete submission', 'Error');
       }
     } catch (error) {
       console.error('Error deleting submission:', error);
-      alert('An error occurred');
+      await showErrorAlert('An error occurred', 'Error');
     }
   };
 

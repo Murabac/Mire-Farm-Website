@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Plus, Edit, Trash2, Mail, User, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { showErrorAlert } from '@/lib/swal';
 
 interface UserData {
   id: string;
@@ -60,11 +61,11 @@ export default function UsersPage() {
         setShowDeleteModal(false);
         setUserToDelete(null);
       } else {
-        alert('Failed to delete user');
+        await showErrorAlert('Failed to delete user', 'Error');
       }
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert('An error occurred while deleting the user');
+      await showErrorAlert('An error occurred while deleting the user', 'Error');
     }
   };
 

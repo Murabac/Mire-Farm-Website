@@ -3,6 +3,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import { MaintenanceCheck } from "@/components/MaintenanceCheck";
 
 export const metadata: Metadata = {
   title: "Mire Farms",
@@ -19,7 +20,9 @@ export default function RootLayout({
       <body className="flex flex-col min-h-screen">
         <LanguageProvider>
           <AuthProvider>
-            <ConditionalLayout>{children}</ConditionalLayout>
+            <MaintenanceCheck>
+              <ConditionalLayout>{children}</ConditionalLayout>
+            </MaintenanceCheck>
           </AuthProvider>
         </LanguageProvider>
       </body>

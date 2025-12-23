@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Save, Languages, Upload, Sparkles } from 'lucide-react';
 import { HeroSection, Language } from '@/types/hero';
+import { showSuccessAlert, showErrorAlert } from '@/lib/swal';
 
 interface HeroFormData {
   en: {
@@ -45,6 +47,8 @@ export function HeroEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [heroImageUrl, setHeroImageUrl] = useState('/images/hero-image.jpg');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [formData, setFormData] = useState<HeroFormData>({
     en: {
       badgeText: '100% Organic & Natural',
@@ -106,12 +110,15 @@ export function HeroEditor() {
 
   const fetchHeroData = async () => {
     try {
-      const response = await fetch('/api/admin/hero', {
+      // Add cache-busting parameter to ensure fresh data
+      const response = await fetch(`/api/admin/hero?t=${Date.now()}`, {
         credentials: 'include',
+        cache: 'no-store',
       });
 
       if (response.ok) {
         const data: HeroSection = await response.json();
+        console.log('Fetched hero data, image URL:', data.hero_image_url);
         
         // Transform database format to form format
         setFormData({
@@ -162,7 +169,12 @@ export function HeroEditor() {
           }
         });
         
-        setHeroImageUrl(data.hero_image_url || '/images/hero-image.jpg');
+        // Set the hero image URL from database
+        const imageUrl = data.hero_image_url || '/images/hero-image.jpg';
+        console.log('Setting hero image URL state to:', imageUrl);
+        setHeroImageUrl(imageUrl);
+      } else {
+        console.error('Failed to fetch hero data, response not ok:', response.status);
       }
     } catch (error) {
       console.error('Error fetching hero data:', error);
@@ -241,14 +253,19 @@ export function HeroEditor() {
       });
 
       if (response.ok) {
-        alert('Hero section saved successfully!');
+        const savedData = await response.json();
+        console.log('Save successful, image URL:', savedData.hero_image_url);
+        await showSuccessAlert('Hero section saved successfully!');
+        // Force reload by setting loading and fetching fresh data
+        setLoading(true);
+        await fetchHeroData();
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`Failed to save: ${errorData.error || 'Unknown error'}`);
+        await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
       }
     } catch (error) {
       console.error('Error saving hero section:', error);
-      alert('Failed to save hero section. Please try again.');
+      await showErrorAlert('Failed to save hero section. Please try again.', 'Error');
     } finally {
       setSaving(false);
     }
@@ -256,6 +273,56 @@ export function HeroEditor() {
 
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHeroImageUrl(e.target.value);
+    setUploadError(null);
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    console.log('File selected:', file.name, file.type, file.size);
+    setUploadError(null);
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'hero');
+
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+      console.log('Upload response data:', data);
+      if (data.url) {
+        console.log('Setting hero image URL to:', data.url);
+        setHeroImageUrl(data.url);
+        // Show success message
+        await showSuccessAlert('Image uploaded successfully! Don\'t forget to click "Save Changes" to save it to the database.', 'Upload Successful');
+      } else {
+        console.error('No URL in upload response:', data);
+        throw new Error('No URL returned from upload');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image';
+      setUploadError(errorMessage);
+      await showErrorAlert(errorMessage, 'Upload Failed');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      e.target.value = '';
+    }
   };
 
   if (loading) {
@@ -510,20 +577,75 @@ export function HeroEditor() {
           {/* Hero Image */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-gray-100">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hero Image URL
+              Hero Image
             </label>
-            <input
-              type="text"
-              value={heroImageUrl}
-              onChange={handleImageUrlChange}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#6B9E3E] mb-4 text-black"
-              placeholder="/images/hero-image.jpg"
-            />
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-sm text-gray-600">Enter image URL above</p>
-              <p className="text-xs text-gray-500 mt-1">Or upload to /public/images/ and use the path</p>
+            
+            {/* Image URL Input */}
+            <div>
+              <input
+                type="text"
+                value={heroImageUrl}
+                onChange={handleImageUrlChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#6B9E3E] mb-2 text-black"
+                placeholder="Image URL or upload below"
+              />
+              <p className="text-xs text-gray-500 mb-4">
+                Current: {heroImageUrl.substring(0, 80)}{heroImageUrl.length > 80 ? '...' : ''}
+              </p>
             </div>
+
+            {/* Upload Area */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#6B9E3E] transition-colors">
+              <input
+                type="file"
+                id="hero-image-upload"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                onChange={handleFileSelect}
+                className="hidden"
+                disabled={uploading}
+              />
+              <label
+                htmlFor="hero-image-upload"
+                className={`cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {uploading ? (
+                  <>
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#6B9E3E] mb-4"></div>
+                    <p className="text-sm text-gray-600">Uploading image...</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-sm text-gray-600 font-medium">Click to upload or drag and drop</p>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG, WebP, or GIF (max 5MB)</p>
+                  </>
+                )}
+              </label>
+            </div>
+
+            {/* Error Message */}
+            {uploadError && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{uploadError}</p>
+              </div>
+            )}
+
+            {/* Image Preview */}
+            {heroImageUrl && !uploadError && (
+              <div className="mt-4">
+                <p className="text-xs text-gray-500 mb-2">Preview:</p>
+                <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={heroImageUrl}
+                    alt="Hero preview"
+                    key={heroImageUrl}
+                    className="w-full h-full object-cover"
+                    onError={() => setUploadError('Failed to load image. Please check the URL.')}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

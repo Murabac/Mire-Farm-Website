@@ -61,7 +61,10 @@ export default function Hero({ heroSectionData }: HeroProps) {
     { number: '100%', label: 'Organic' },
     { number: '4+', label: 'Countries' },
   ];
-  const heroImageUrl = heroData?.heroImageUrl || '/images/hero-image.jpg';
+  // Get hero image URL, ensuring we use the database value if available
+  const heroImageUrl = heroData?.heroImageUrl && heroData.heroImageUrl.trim() !== '' 
+    ? heroData.heroImageUrl 
+    : '/images/hero-image.jpg';
   const bottomBadgeTitle = heroData?.bottomBadgeTitle || 'Est. 2024';
   const bottomBadgeSubtitle = heroData?.bottomBadgeSubtitle || 'Organic Farm';
   return (

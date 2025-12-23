@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, Mail, CheckCircle, XCircle, Trash2, Calendar, Download } from 'lucide-react';
 import Link from 'next/link';
+import { showErrorAlert, showConfirmDialog } from '@/lib/swal';
 
 interface Subscriber {
   id: string;
@@ -73,16 +74,17 @@ export default function SubscribersPage() {
       if (response.ok) {
         fetchSubscribers();
       } else {
-        alert('Failed to update subscription status');
+        await showErrorAlert('Failed to update subscription status', 'Error');
       }
     } catch (error) {
       console.error('Error updating subscription:', error);
-      alert('An error occurred');
+      await showErrorAlert('An error occurred', 'Error');
     }
   };
 
   const handleDelete = async (id: string, email: string) => {
-    if (!confirm(`Are you sure you want to delete ${email}?`)) {
+    const confirmed = await showConfirmDialog(`Are you sure you want to delete ${email}?`);
+    if (!confirmed) {
       return;
     }
 
@@ -95,11 +97,11 @@ export default function SubscribersPage() {
       if (response.ok) {
         fetchSubscribers();
       } else {
-        alert('Failed to delete subscriber');
+        await showErrorAlert('Failed to delete subscriber', 'Error');
       }
     } catch (error) {
       console.error('Error deleting subscriber:', error);
-      alert('An error occurred');
+      await showErrorAlert('An error occurred', 'Error');
     }
   };
 
