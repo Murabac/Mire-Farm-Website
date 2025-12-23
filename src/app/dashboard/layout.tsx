@@ -32,12 +32,19 @@ const navigation = [
       { name: 'Hero Section', href: '/dashboard/hero' },
       { name: 'Benefits', href: '/dashboard/benefits' },
       { name: 'Mission & Vision', href: '/dashboard/mission-vision' },
-      { name: 'Products', href: '/dashboard/products' },
+      { name: 'Products Overview', href: '/dashboard/products' },
       { name: 'Contact Info', href: '/dashboard/contact-info' },
-      { name: 'News Articles', href: '/dashboard/news' },
-      { name: 'Gallery', href: '/dashboard/gallery' },
     ]
   },
+  { 
+    name: 'News', 
+    icon: Newspaper,
+    children: [
+      { name: 'Newsletters List', href: '/dashboard/news/newsletters' },
+      { name: 'Create News Post', href: '/dashboard/news/new' },
+    ]
+  },
+  { name: 'Gallery', href: '/dashboard/gallery', icon: ImageIcon },
   { 
     name: 'Submissions', 
     icon: MessageSquare,
@@ -56,7 +63,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [expandedSections, setExpandedSections] = useState<string[]>(['Content', 'Submissions']);
+  const [expandedSections, setExpandedSections] = useState<string[]>(['Content', 'News', 'Submissions']);
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading: authLoading, signOut } = useAuth();

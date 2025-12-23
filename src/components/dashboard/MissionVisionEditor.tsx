@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Save, Languages, Plus, Trash2, GripVertical, Target } from 'lucide-react';
 import { MissionVisionValue, CoreValue, MissionVisionSectionHeader } from '@/types/mission-vision';
 import { Language } from '@/types/hero';
+import { showSuccessAlert, showErrorAlert } from '@/lib/swal';
 
 interface SectionHeaderForm {
   title_en: string;
@@ -223,15 +224,15 @@ export function MissionVisionEditor() {
       });
 
       if (response.ok) {
-        alert('Mission & Vision saved successfully!');
+        await showSuccessAlert('Mission & Vision saved successfully!');
         await fetchData();
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`Failed to save: ${errorData.error || 'Unknown error'}`);
+        await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
       }
     } catch (error) {
       console.error('Error saving mission vision:', error);
-      alert('Failed to save mission & vision. Please try again.');
+      await showErrorAlert('Failed to save mission & vision. Please try again.', 'Error');
     } finally {
       setSaving(false);
     }

@@ -1,10 +1,40 @@
 import { createServerClient, isSupabaseConfigured } from './supabase';
 import { GalleryCategory, LocalizedGalleryCategory } from '@/types/gallery';
+import { GalleryImage } from '@/types/gallery-images';
 import { Language } from '@/types/hero';
 
 /**
- * Helper functions for working with Gallery Categories from Supabase
+ * Helper functions for working with Gallery from Supabase
  */
+
+// Get all gallery images
+export async function getGalleryImages(): Promise<GalleryImage[]> {
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase is not configured. Gallery images will use fallback data.');
+    return [];
+  }
+
+  try {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+      .from('gallery_images')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      // Only log if it's not a "table not found" error (PGRST205)
+      if (error.code !== 'PGRST205') {
+        console.error('Error fetching gallery images:', error);
+      }
+      return [];
+    }
+
+    return (data || []) as GalleryImage[];
+  } catch (error) {
+    console.error('Error fetching gallery images:', error);
+    return [];
+  }
+}
 
 // Get all active gallery categories
 export async function getGalleryCategories(): Promise<GalleryCategory[]> {

@@ -10,12 +10,16 @@ import {
   getMissionVisionValues,
   getCoreValues,
 } from '@/lib/mission-vision-helpers';
-import { getProducts } from '@/lib/products-helpers';
+import { getProductsOverviewSectionHeader, getProductsOverviewCards } from '@/lib/products-overview-helpers';
 import { getContactInfo } from '@/lib/contact-helpers';
 import { HeroSection } from '@/types/hero';
 import { Benefit } from '@/types/benefits';
-import { Product } from '@/types/products';
+import { ProductsOverviewSectionHeader, ProductsOverviewCard } from '@/types/products-overview';
 import { ContactInfo } from '@/types/contact';
+
+// Force dynamic rendering to always fetch fresh data from database
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function Home() {
   // Fetch hero section data from database
@@ -30,8 +34,9 @@ export default async function Home() {
   const missionVisionValues = await getMissionVisionValues();
   const coreValues = await getCoreValues();
 
-  // Fetch products data from database
-  const productsData: Product[] = await getProducts();
+  // Fetch products overview section header and cards from database
+  const productsOverviewHeaderData: ProductsOverviewSectionHeader | null = await getProductsOverviewSectionHeader();
+  const productsOverviewCardsData: ProductsOverviewCard[] = await getProductsOverviewCards();
 
   // Fetch contact information from database
   const contactInfoData: ContactInfo | null = await getContactInfo();
@@ -45,7 +50,7 @@ export default async function Home() {
         missionVisionValues={missionVisionValues}
         coreValues={coreValues}
       />
-      <ProductsOverview productsData={productsData} />
+      <ProductsOverview sectionHeaderData={productsOverviewHeaderData} cardsData={productsOverviewCardsData} />
       <ContactSection contactInfoData={contactInfoData} />
     </main>
   );

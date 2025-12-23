@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Globe, Database, Key } from 'lucide-react';
+import { showSuccessAlert, showErrorAlert } from '@/lib/swal';
 
 interface LanguageSetting {
   language_code: string;
@@ -84,7 +85,7 @@ export default function SettingsPage() {
     // Ensure at least one language remains enabled
     const enabledCount = languageSettings.filter(s => s.enabled && s.language_code !== code).length;
     if (enabledCount === 0) {
-      alert('At least one language must be enabled');
+      await showErrorAlert('At least one language must be enabled', 'Validation Error');
       return;
     }
 
@@ -110,15 +111,15 @@ export default function SettingsPage() {
       });
 
       if (response.ok) {
-        alert('Language settings saved successfully!');
+        await showSuccessAlert('Language settings saved successfully!');
         // Reload settings from API to ensure we have the latest data
         await fetchLanguageSettings();
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`Failed to save: ${errorData.error || 'Unknown error'}`);
+        await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
       }
     } catch (error) {
-      alert('Failed to save language settings. Please try again.');
+      await showErrorAlert('Failed to save language settings. Please try again.', 'Error');
     } finally {
       setSaving(false);
     }
