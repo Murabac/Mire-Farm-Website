@@ -44,3 +44,4 @@ INSERT INTO mire_farm_website.language_settings (language_code, enabled, display
 ON CONFLICT (language_code) DO NOTHING;
 
 
+

@@ -40,3 +40,4 @@ VALUES
   ('news', 'News', '/news', TRUE, 4)
 ON CONFLICT (menu_key) DO NOTHING;
 
+
