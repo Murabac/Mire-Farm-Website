@@ -73,19 +73,28 @@ export default function GrowthExpansionEditorPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/growth-expansion?t=${Date.now()}`, {
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(7);
+      const response = await fetch(`/api/admin/growth-expansion?t=${timestamp}&r=${random}`, {
+        method: 'GET',
         credentials: 'include',
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate',
           'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Requested-With': 'XMLHttpRequest',
         },
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched growth expansion data from API:', data);
+        console.log('Timestamp:', timestamp);
         
         if (data.header) {
+          console.log('Setting header:', data.header);
           setHeader({
             id: data.header.id,
             title_en: data.header.title_en ?? '',
@@ -97,9 +106,23 @@ export default function GrowthExpansionEditorPage() {
             image_url: data.header.image_url ?? '',
             active: data.header.active !== false,
           });
+        } else {
+          // Reset to empty if no header
+          setHeader({
+            id: null,
+            title_en: '',
+            title_so: '',
+            title_ar: '',
+            description_en: '',
+            description_so: '',
+            description_ar: '',
+            image_url: '',
+            active: true,
+          });
         }
 
-        if (data.plans && Array.isArray(data.plans)) {
+        if (data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
+          console.log('Setting plans:', data.plans);
           setPlans(data.plans.map((p: GrowthExpansionPlan) => ({
             id: p.id,
             emoji: p.emoji ?? '🌍',
@@ -112,9 +135,13 @@ export default function GrowthExpansionEditorPage() {
             display_order: p.display_order,
             active: p.active !== false,
           })));
+        } else {
+          console.log('No plans found, setting empty array');
+          setPlans([]);
         }
 
-        if (data.stats && Array.isArray(data.stats)) {
+        if (data.stats && Array.isArray(data.stats) && data.stats.length > 0) {
+          console.log('Setting stats:', data.stats);
           setStats(data.stats.map((s: GrowthExpansionStat) => ({
             id: s.id,
             number: s.number ?? '',
@@ -124,12 +151,31 @@ export default function GrowthExpansionEditorPage() {
             display_order: s.display_order,
             active: s.active !== false,
           })));
+        } else {
+          console.log('No stats found, setting empty array');
+          setStats([]);
         }
       } else {
-        console.error('Failed to fetch growth expansion data:', response.status);
+        console.error('Failed to fetch growth expansion data:', response.status, response.statusText);
+        // Reset state on error
+        setHeader({
+          id: null,
+          title_en: '',
+          title_so: '',
+          title_ar: '',
+          description_en: '',
+          description_so: '',
+          description_ar: '',
+          image_url: '',
+          active: true,
+        });
+        setPlans([]);
+        setStats([]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setPlans([]);
+      setStats([]);
     } finally {
       setLoading(false);
     }
@@ -180,16 +226,71 @@ export default function GrowthExpansionEditorPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch('/api/admin/growth-expansion', {
+      const timestamp = Date.now();
+      const response = await fetch(`/api/admin/growth-expansion?t=${timestamp}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
         credentials: 'include',
+        cache: 'no-store',
         body: JSON.stringify({ header, plans, stats }),
       });
 
       if (response.ok) {
+        // The PUT endpoint returns the updated data, use it directly
+        const updatedData = await response.json();
+        console.log('Saved and received updated growth expansion:', updatedData);
+        
+        // Update state with the returned data
+        if (updatedData.header) {
+          setHeader({
+            id: updatedData.header.id,
+            title_en: updatedData.header.title_en ?? '',
+            title_so: updatedData.header.title_so ?? '',
+            title_ar: updatedData.header.title_ar ?? '',
+            description_en: updatedData.header.description_en ?? '',
+            description_so: updatedData.header.description_so ?? '',
+            description_ar: updatedData.header.description_ar ?? '',
+            image_url: updatedData.header.image_url ?? '',
+            active: updatedData.header.active !== false,
+          });
+        }
+        
+        if (updatedData.plans && Array.isArray(updatedData.plans)) {
+          setPlans(updatedData.plans.map((p: GrowthExpansionPlan) => ({
+            id: p.id,
+            emoji: p.emoji ?? '🌍',
+            title_en: p.title_en ?? '',
+            title_so: p.title_so ?? '',
+            title_ar: p.title_ar ?? '',
+            description_en: p.description_en ?? '',
+            description_so: p.description_so ?? '',
+            description_ar: p.description_ar ?? '',
+            display_order: p.display_order,
+            active: p.active !== false,
+          })));
+        } else {
+          setPlans([]);
+        }
+        
+        if (updatedData.stats && Array.isArray(updatedData.stats)) {
+          setStats(updatedData.stats.map((s: GrowthExpansionStat) => ({
+            id: s.id,
+            number: s.number ?? '',
+            label_en: s.label_en ?? '',
+            label_so: s.label_so ?? '',
+            label_ar: s.label_ar ?? '',
+            display_order: s.display_order,
+            active: s.active !== false,
+          })));
+        } else {
+          setStats([]);
+        }
+        
         await showSuccessAlert('Growth & Expansion section saved successfully!');
-        await fetchData();
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
@@ -633,5 +734,6 @@ export default function GrowthExpansionEditorPage() {
     </div>
   );
 }
+
 
 

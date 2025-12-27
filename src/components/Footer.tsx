@@ -1,5 +1,11 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { ContactInfo } from '@/types/contact';
+import { getLocalizedContactInfo } from '@/lib/contact-helpers';
 
 // Icon Components
 const Facebook = ({ className }: { className?: string }) => (
@@ -37,19 +43,57 @@ const MapPin = ({ className }: { className?: string }) => (
 );
 
 export default function Footer() {
+  const { language } = useLanguage();
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch contact info on mount
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const response = await fetch('/api/contact-info', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setContactInfo(data);
+        }
+      } catch (error) {
+        console.error('Error fetching contact info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContactInfo();
+  }, []);
+
+  // Get localized contact info
+  const localizedContactInfo = contactInfo ? getLocalizedContactInfo(contactInfo, language) : null;
+  const location = localizedContactInfo?.location || 'Arabsiyo Village, Gabiley Region, Somaliland';
+  const phone = localizedContactInfo?.phone || '+252 63 4222 609';
+  const email = localizedContactInfo?.email || 'info@mirefarms.com';
+  const hours = localizedContactInfo?.hours || 'Saturday - Thursday: 7:00 AM - 5:00 PM\nFriday: Closed';
+
   return (
     <footer className="bg-[#2C5F2D] text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="col-span-1 md:col-span-1">
-            <Image
-              src="/images/Mire fields.png"
-              alt="Mire Farms Logo"
-              width={64}
-              height={64}
-              className="h-16 w-auto mb-4"
-            />
+            <Link href="/" className="inline-block">
+              <Image
+                src="/images/logo.png"
+                alt="Mire Farms Logo"
+                width={64}
+                height={64}
+                className="h-16 w-auto mb-4 object-contain"
+              />
+            </Link>
             <p className="text-green-100 text-sm">
               Growing organic, pesticide-free produce in Somaliland since 2024.
             </p>
@@ -83,39 +127,46 @@ export default function Footer() {
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h3 className="mb-4">Contact</h3>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span className="text-green-100">Arabsiyo Village, Gabiley Region, Somaliland</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 flex-shrink-0" />
-                <span className="text-green-100">+252 63 4222 609</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 flex-shrink-0" />
-                <span className="text-green-100">info@mirefarms.com</span>
-              </li>
-            </ul>
-          </div>
+          {!loading && (
+            <>
+              <div>
+                <h3 className="mb-4">Contact</h3>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span className="text-green-100 whitespace-pre-line">{location}</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 flex-shrink-0" />
+                    <a href={`tel:${phone.replace(/\s+/g, '')}`} className="text-green-100 hover:text-white transition-colors">
+                      {phone}
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 flex-shrink-0" />
+                    <a href={`mailto:${email}`} className="text-green-100 hover:text-white transition-colors">
+                      {email}
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
-          {/* Social & Hours */}
-          <div>
-            <h3 className="mb-4">Follow Us</h3>
-            <div className="flex gap-4 mb-6">
-              <a href="#" className="text-green-100 hover:text-white transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-green-100 hover:text-white transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-            </div>
-            <h3 className="mb-2">Hours</h3>
-            <p className="text-green-100 text-sm">Saturday - Thursday: 7:00 AM - 5:00 PM</p>
-            <p className="text-green-100 text-sm">Friday: Closed</p>
-          </div>
+              {/* Social & Hours */}
+              <div>
+                <h3 className="mb-4">Follow Us</h3>
+                <div className="flex gap-4 mb-6">
+                  <a href="#" className="text-green-100 hover:text-white transition-colors">
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                  <a href="#" className="text-green-100 hover:text-white transition-colors">
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                </div>
+                <h3 className="mb-2">Hours</h3>
+                <p className="text-green-100 text-sm whitespace-pre-line">{hours}</p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="border-t border-green-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">

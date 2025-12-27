@@ -41,3 +41,4 @@ VALUES
 ON CONFLICT (menu_key) DO NOTHING;
 
 
+

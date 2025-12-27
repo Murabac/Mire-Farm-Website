@@ -50,3 +50,4 @@ INSERT INTO mire_farm_website.site_settings (
 ) ON CONFLICT DO NOTHING;
 
 
+

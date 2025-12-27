@@ -4,6 +4,8 @@ import { verifyToken, getTokenFromCookies } from '@/lib/auth-utils';
 import { ProductsOverviewSectionHeader, ProductsOverviewCard } from '@/types/products-overview';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,10 +45,23 @@ export async function GET(request: NextRequest) {
         .order('display_order', { ascending: true }),
     ]);
 
-    return NextResponse.json({
+    console.log('API: GET - Fetched products overview from database:', {
+      header: headerResult.data,
+      cards: cardsResult.data,
+    });
+
+    const response = NextResponse.json({
       header: headerResult.data as ProductsOverviewSectionHeader | null,
       cards: (cardsResult.data || []) as ProductsOverviewCard[],
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Content-Type-Options': 'nosniff',
+      },
     });
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -184,10 +199,23 @@ export async function PUT(request: NextRequest) {
         .order('display_order', { ascending: true }),
     ]);
 
-    return NextResponse.json({
+    console.log('API: PUT - Fetched updated products overview from database:', {
+      header: headerResult.data,
+      cards: cardsResult.data,
+    });
+
+    const response = NextResponse.json({
       header: headerResult.data as ProductsOverviewSectionHeader | null,
       cards: (cardsResult.data || []) as ProductsOverviewCard[],
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Content-Type-Options': 'nosniff',
+      },
     });
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },

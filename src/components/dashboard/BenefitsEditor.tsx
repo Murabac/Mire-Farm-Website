@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Save, Languages, Plus, Trash2, GripVertical, CheckCircle2 } from 'lucide-react';
 import { Benefit } from '@/types/benefits';
 import { Language } from '@/types/hero';
@@ -27,38 +27,65 @@ export function BenefitsEditor() {
     { code: 'ar', name: 'Arabic', flag: '🇸🇦' }
   ];
 
-  // Fetch benefits data on mount
-  useEffect(() => {
-    fetchBenefitsData();
-  }, []);
-
-  const fetchBenefitsData = async () => {
+  const fetchBenefitsData = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/benefits', {
+      setLoading(true);
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(7);
+      const response = await fetch(`/api/admin/benefits?t=${timestamp}&r=${random}`, {
+        method: 'GET',
         credentials: 'include',
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       });
 
       if (response.ok) {
         const data: Benefit[] = await response.json();
+        console.log('Fetched benefits data from API:', data);
+        console.log('Timestamp:', timestamp);
         
-        // Transform database format to form format
-        const formBenefits = data.map((benefit) => ({
-          id: benefit.id,
-          text_en: benefit.text_en || '',
-          text_so: benefit.text_so || '',
-          text_ar: benefit.text_ar || '',
-          display_order: benefit.display_order || 0,
-          active: benefit.active !== false,
-        })).sort((a, b) => a.display_order - b.display_order);
-        
-        setBenefits(formBenefits);
+        // Always set benefits to what we get from the database (even if empty)
+        if (data && Array.isArray(data)) {
+          // Transform database format to form format
+          const formBenefits = data.map((benefit) => ({
+            id: benefit.id,
+            text_en: benefit.text_en ?? '',
+            text_so: benefit.text_so ?? '',
+            text_ar: benefit.text_ar ?? '',
+            display_order: benefit.display_order ?? 0,
+            active: benefit.active !== false,
+          })).sort((a, b) => a.display_order - b.display_order);
+          
+          console.log('Setting benefits state to:', formBenefits);
+          // Set benefits directly
+          setBenefits(formBenefits);
+        } else {
+          // If no data, set empty array
+          setBenefits([]);
+        }
+      } else {
+        console.error('Failed to fetch benefits:', response.status, response.statusText);
+        // Set empty array on error to clear stale data
+        setBenefits([]);
       }
     } catch (error) {
       console.error('Error fetching benefits data:', error);
+      setBenefits([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch benefits data on mount
+  useEffect(() => {
+    fetchBenefitsData();
+  }, [fetchBenefitsData]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -73,19 +100,35 @@ export function BenefitsEditor() {
         active: benefit.active,
       }));
 
-      const response = await fetch('/api/admin/benefits', {
+      const response = await fetch(`/api/admin/benefits?t=${Date.now()}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
         },
         credentials: 'include',
+        cache: 'no-store',
         body: JSON.stringify({ benefits: payload }),
       });
 
       if (response.ok) {
+        // The PUT endpoint returns the updated benefits, use them directly
+        const updatedData: Benefit[] = await response.json();
+        console.log('Saved and received updated benefits:', updatedData);
+        
+        // Transform database format to form format and update state immediately
+        const formBenefits = updatedData.map((benefit) => ({
+          id: benefit.id,
+          text_en: benefit.text_en ?? '',
+          text_so: benefit.text_so ?? '',
+          text_ar: benefit.text_ar ?? '',
+          display_order: benefit.display_order ?? 0,
+          active: benefit.active !== false,
+        })).sort((a, b) => a.display_order - b.display_order);
+        
+        setBenefits(formBenefits);
         await showSuccessAlert('Benefits saved successfully!');
-        // Reload data to get updated IDs for new items
-        await fetchBenefitsData();
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
@@ -252,7 +295,7 @@ export function BenefitsEditor() {
                   const currentText = benefit[textField] as string;
 
                   return (
-                    <div key={index} className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div key={`benefit-${benefit.id}-${index}-${benefit.text_en}`} className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
                       <div className="flex items-start gap-3">
                         {/* Drag Handle */}
                         <div className="flex flex-col gap-1 pt-2">

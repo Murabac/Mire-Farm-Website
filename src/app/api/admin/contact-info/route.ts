@@ -4,6 +4,8 @@ import { verifyToken, getTokenFromCookies } from '@/lib/auth-utils';
 import { ContactInfo } from '@/types/contact';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,7 +50,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(data as ContactInfo);
+    console.log('API: GET - Fetched contact info from database:', data);
+
+    const response = NextResponse.json(data as ContactInfo, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -110,7 +122,17 @@ export async function PUT(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(data as ContactInfo);
+      console.log('API: PUT - Updated contact info in database:', data);
+
+      const response = NextResponse.json(data as ContactInfo, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+      return response;
     } else {
       // Create new contact info
       const { data, error } = await supabase
@@ -129,7 +151,17 @@ export async function PUT(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(data as ContactInfo);
+      console.log('API: PUT - Created contact info in database:', data);
+
+      const response = NextResponse.json(data as ContactInfo, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+      return response;
     }
   } catch (error) {
     return NextResponse.json(
@@ -138,5 +170,6 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
 
 

@@ -137,6 +137,8 @@ export default function SocialImpactEditorPage() {
             display_order: c.display_order,
             active: c.active !== false,
           })));
+        } else {
+          setCards([]);
         }
 
         if (data.commitment) {
@@ -178,7 +180,10 @@ export default function SocialImpactEditorPage() {
 
       if (response.ok) {
         await showSuccessAlert('Social Impact section saved successfully!');
-        await fetchData();
+        // Add a small delay to ensure database is updated
+        setTimeout(async () => {
+          await fetchData();
+        }, 100);
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
@@ -536,5 +541,6 @@ export default function SocialImpactEditorPage() {
     </div>
   );
 }
+
 
 
