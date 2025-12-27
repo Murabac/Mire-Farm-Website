@@ -49,3 +49,4 @@ INSERT INTO mire_farm_website.site_settings (
   'We are currently performing scheduled maintenance. Please check back soon.'
 ) ON CONFLICT DO NOTHING;
 
+

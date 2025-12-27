@@ -11,3 +11,4 @@ export interface GalleryImage {
   created_at: string;
 }
 
+
