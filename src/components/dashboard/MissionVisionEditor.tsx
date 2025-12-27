@@ -106,8 +106,13 @@ export function MissionVisionEditor() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/admin/mission-vision', {
+      const response = await fetch(`/api/admin/mission-vision?t=${Date.now()}`, {
         credentials: 'include',
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
       });
 
       if (response.ok) {
@@ -116,12 +121,12 @@ export function MissionVisionEditor() {
         // Set section header
         if (data.sectionHeader) {
           setSectionHeader({
-            title_en: data.sectionHeader.title_en || '',
-            title_so: data.sectionHeader.title_so || '',
-            title_ar: data.sectionHeader.title_ar || '',
-            description_en: data.sectionHeader.description_en || '',
-            description_so: data.sectionHeader.description_so || '',
-            description_ar: data.sectionHeader.description_ar || '',
+            title_en: data.sectionHeader.title_en ?? '',
+            title_so: data.sectionHeader.title_so ?? '',
+            title_ar: data.sectionHeader.title_ar ?? '',
+            description_en: data.sectionHeader.description_en ?? '',
+            description_so: data.sectionHeader.description_so ?? '',
+            description_ar: data.sectionHeader.description_ar ?? '',
           });
         }
 
@@ -130,16 +135,16 @@ export function MissionVisionEditor() {
           const mvvItems = data.missionVisionValues.map((item: MissionVisionValue) => ({
             id: item.id,
             type: item.type,
-            emoji: item.emoji || '',
-            title_en: item.title_en || '',
-            title_so: item.title_so || '',
-            title_ar: item.title_ar || '',
-            description_en: item.description_en || '',
-            description_so: item.description_so || '',
-            description_ar: item.description_ar || '',
-            bg_color_class: item.bg_color_class || 'from-green-50 to-white',
-            border_color_class: item.border_color_class || 'border-green-100',
-            display_order: item.display_order || 0,
+            emoji: item.emoji ?? '',
+            title_en: item.title_en ?? '',
+            title_so: item.title_so ?? '',
+            title_ar: item.title_ar ?? '',
+            description_en: item.description_en ?? '',
+            description_so: item.description_so ?? '',
+            description_ar: item.description_ar ?? '',
+            bg_color_class: item.bg_color_class ?? 'from-green-50 to-white',
+            border_color_class: item.border_color_class ?? 'border-green-100',
+            display_order: item.display_order ?? 0,
             active: item.active !== false,
           })).sort((a: MissionVisionFormItem, b: MissionVisionFormItem) => a.display_order - b.display_order);
           
@@ -150,15 +155,15 @@ export function MissionVisionEditor() {
         if (data.coreValues) {
           const cvItems = data.coreValues.map((item: CoreValue) => ({
             id: item.id,
-            title_en: item.title_en || '',
-            title_so: item.title_so || '',
-            title_ar: item.title_ar || '',
-            description_en: item.description_en || '',
-            description_so: item.description_so || '',
-            description_ar: item.description_ar || '',
-            icon_type: item.icon_type || 'organic',
-            color_class: item.color_class || 'bg-green-100 text-green-600',
-            display_order: item.display_order || 0,
+            title_en: item.title_en ?? '',
+            title_so: item.title_so ?? '',
+            title_ar: item.title_ar ?? '',
+            description_en: item.description_en ?? '',
+            description_so: item.description_so ?? '',
+            description_ar: item.description_ar ?? '',
+            icon_type: item.icon_type ?? 'organic',
+            color_class: item.color_class ?? 'bg-green-100 text-green-600',
+            display_order: item.display_order ?? 0,
             active: item.active !== false,
           })).sort((a: CoreValueFormItem, b: CoreValueFormItem) => a.display_order - b.display_order);
           
@@ -225,7 +230,10 @@ export function MissionVisionEditor() {
 
       if (response.ok) {
         await showSuccessAlert('Mission & Vision saved successfully!');
-        await fetchData();
+        // Add a small delay to ensure database is updated
+        setTimeout(async () => {
+          await fetchData();
+        }, 100);
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');

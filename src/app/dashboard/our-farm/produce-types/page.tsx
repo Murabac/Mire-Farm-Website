@@ -37,15 +37,15 @@ export default function ProduceTypesEditorPage() {
     active: boolean;
   }>({
     id: null,
-    title_en: 'What We Grow 🌱',
-    title_so: 'Waxa Aan Korinayno 🌱',
-    title_ar: 'ما نزرعه 🌱',
-    description_en: 'We cultivate a wide variety of organic fruits and vegetables throughout the year.',
-    description_so: 'Waxaynu korinaynaa noocyo badan oo khudaar iyo mirooyin dabiici ah sanadka oo dhan.',
-    description_ar: 'نزرع مجموعة متنوعة من الفواكه والخضروات العضوية على مدار السنة.',
-    footer_badge_text_en: '✨ All produce is grown using natural, pesticide-free methods',
-    footer_badge_text_so: '✨ Dhammaan khudaarta waxaa la koriyey iyadoo la adeegsanayo hababka dabiiciga ah',
-    footer_badge_text_ar: '✨ جميع المنتجات تزرع باستخدام طرق طبيعية خالية من المبيدات',
+    title_en: '',
+    title_so: '',
+    title_ar: '',
+    description_en: '',
+    description_so: '',
+    description_ar: '',
+    footer_badge_text_en: '',
+    footer_badge_text_so: '',
+    footer_badge_text_ar: '',
     active: true,
   });
 
@@ -63,6 +63,10 @@ export default function ProduceTypesEditorPage() {
       const response = await fetch(`/api/admin/produce-types?t=${Date.now()}`, {
         credentials: 'include',
         cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
       });
 
       if (response.ok) {
@@ -71,15 +75,15 @@ export default function ProduceTypesEditorPage() {
         if (data.header) {
           setHeader({
             id: data.header.id,
-            title_en: data.header.title_en || '',
-            title_so: data.header.title_so || '',
-            title_ar: data.header.title_ar || '',
-            description_en: data.header.description_en || '',
-            description_so: data.header.description_so || '',
-            description_ar: data.header.description_ar || '',
-            footer_badge_text_en: data.header.footer_badge_text_en || '',
-            footer_badge_text_so: data.header.footer_badge_text_so || '',
-            footer_badge_text_ar: data.header.footer_badge_text_ar || '',
+            title_en: data.header.title_en ?? '',
+            title_so: data.header.title_so ?? '',
+            title_ar: data.header.title_ar ?? '',
+            description_en: data.header.description_en ?? '',
+            description_so: data.header.description_so ?? '',
+            description_ar: data.header.description_ar ?? '',
+            footer_badge_text_en: data.header.footer_badge_text_en ?? '',
+            footer_badge_text_so: data.header.footer_badge_text_so ?? '',
+            footer_badge_text_ar: data.header.footer_badge_text_ar ?? '',
             active: data.header.active !== false,
           });
         }
@@ -87,13 +91,15 @@ export default function ProduceTypesEditorPage() {
         if (data.items && data.items.length > 0) {
           setItems(data.items.map((item: ProduceItem) => ({
             id: item.id,
-            name_en: item.name_en || '',
-            name_so: item.name_so || '',
-            name_ar: item.name_ar || '',
-            emoji: item.emoji || '🌱',
+            name_en: item.name_en ?? '',
+            name_so: item.name_so ?? '',
+            name_ar: item.name_ar ?? '',
+            emoji: item.emoji ?? '🌱',
             display_order: item.display_order,
             active: item.active !== false,
           })));
+        } else {
+          setItems([]);
         }
       }
     } catch (error) {
@@ -119,7 +125,10 @@ export default function ProduceTypesEditorPage() {
 
       if (response.ok) {
         await showSuccessAlert('Produce Types section saved successfully!');
-        await fetchData();
+        // Add a small delay to ensure database is updated
+        setTimeout(async () => {
+          await fetchData();
+        }, 100);
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
@@ -380,5 +389,6 @@ export default function ProduceTypesEditorPage() {
     </div>
   );
 }
+
 
 

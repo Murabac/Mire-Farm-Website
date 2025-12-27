@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Save, Languages, Package, Upload, ArrowUp, ArrowDown, Image as ImageIcon } from 'lucide-react';
 import { ProductsOverviewSectionHeader, ProductsOverviewCard } from '@/types/products-overview';
 import { Language } from '@/types/hero';
@@ -45,22 +45,22 @@ export function ProductsOverviewEditor() {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<ProductsOverviewFormData>({
     en: {
-      title: 'Our Fresh Produce',
-      description: 'We cultivate a diverse range of organic fruits and vegetables, all grown with care and without the use of harmful pesticides or chemicals.',
-      buttonText: 'View All Products',
-      badgeText: '100% Organic',
+      title: '',
+      description: '',
+      buttonText: '',
+      badgeText: '',
     },
     so: {
-      title: 'Khudaarta iyo Mirooyinkayaga Cusub',
-      description: 'Waxaynu korinaynaa noocyo badan oo khudaar iyo mirooyin dabiici ah, dhammaan waxay la koriyey si xirfad leh oo aan la adeegsanayn dhirta ama kiimikada wanaagsan.',
-      buttonText: 'Eeg Dhammaan Alaabta',
-      badgeText: '100% Dabiici',
+      title: '',
+      description: '',
+      buttonText: '',
+      badgeText: '',
     },
     ar: {
-      title: 'منتجاتنا الطازجة',
-      description: 'نزرع مجموعة متنوعة من الفواكه والخضروات العضوية، كلها مزروعة بعناية وبدون استخدام مبيدات أو مواد كيميائية ضارة.',
-      buttonText: 'عرض جميع المنتجات',
-      badgeText: '100% عضوي',
+      title: '',
+      description: '',
+      buttonText: '',
+      badgeText: '',
     },
   });
   const [cards, setCards] = useState<CardFormItem[]>([]);
@@ -74,57 +74,75 @@ export function ProductsOverviewEditor() {
     { code: 'ar', name: 'Arabic', flag: '🇸🇦' }
   ];
 
-  // Fetch data on mount
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      // Add cache-busting parameter to ensure fresh data
-      const response = await fetch(`/api/admin/products-overview?t=${Date.now()}`, {
+      setLoading(true);
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(7);
+      const response = await fetch(`/api/admin/products-overview?t=${timestamp}&r=${random}`, {
+        method: 'GET',
         credentials: 'include',
         cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched products overview data from API:', data);
+        console.log('Timestamp:', timestamp);
         
+        // Always set data from database (even if null/empty)
         if (data.header) {
+          console.log('Setting form data header:', data.header);
           setFormData({
             en: {
-              title: data.header.title_en || '',
-              description: data.header.description_en || '',
-              buttonText: data.header.button_text_en || '',
-              badgeText: data.header.badge_text_en || '',
+              title: data.header.title_en ?? '',
+              description: data.header.description_en ?? '',
+              buttonText: data.header.button_text_en ?? '',
+              badgeText: data.header.badge_text_en ?? '',
             },
             so: {
-              title: data.header.title_so || '',
-              description: data.header.description_so || '',
-              buttonText: data.header.button_text_so || '',
-              badgeText: data.header.badge_text_so || '',
+              title: data.header.title_so ?? '',
+              description: data.header.description_so ?? '',
+              buttonText: data.header.button_text_so ?? '',
+              badgeText: data.header.badge_text_so ?? '',
             },
             ar: {
-              title: data.header.title_ar || '',
-              description: data.header.description_ar || '',
-              buttonText: data.header.button_text_ar || '',
-              badgeText: data.header.badge_text_ar || '',
+              title: data.header.title_ar ?? '',
+              description: data.header.description_ar ?? '',
+              buttonText: data.header.button_text_ar ?? '',
+              badgeText: data.header.badge_text_ar ?? '',
             },
+          });
+        } else {
+          // Reset to empty if no header
+          setFormData({
+            en: { title: '', description: '', buttonText: '', badgeText: '' },
+            so: { title: '', description: '', buttonText: '', badgeText: '' },
+            ar: { title: '', description: '', buttonText: '', badgeText: '' },
           });
         }
 
-        if (data.cards && Array.isArray(data.cards)) {
+        if (data.cards && Array.isArray(data.cards) && data.cards.length > 0) {
           const formCards = data.cards.map((card: ProductsOverviewCard) => ({
             id: card.id,
-            name_en: card.name_en || '',
-            name_so: card.name_so || '',
-            name_ar: card.name_ar || '',
-            description_en: card.description_en || '',
-            description_so: card.description_so || '',
-            description_ar: card.description_ar || '',
-            image: card.image || '',
+            name_en: card.name_en ?? '',
+            name_so: card.name_so ?? '',
+            name_ar: card.name_ar ?? '',
+            description_en: card.description_en ?? '',
+            description_so: card.description_so ?? '',
+            description_ar: card.description_ar ?? '',
+            image: card.image ?? '',
             display_order: card.display_order,
           })).sort((a: CardFormItem, b: CardFormItem) => a.display_order - b.display_order);
+          
+          console.log('Setting cards:', formCards);
           
           // Ensure we have exactly 2 cards
           while (formCards.length < 2) {
@@ -143,6 +161,7 @@ export function ProductsOverviewEditor() {
           setCards(formCards.slice(0, 2));
         } else {
           // Initialize with empty cards if none exist
+          console.log('No cards found, setting empty cards');
           setCards([
             {
               id: null,
@@ -168,13 +187,20 @@ export function ProductsOverviewEditor() {
             },
           ]);
         }
+      } else {
+        console.error('Failed to fetch products overview:', response.status, response.statusText);
       }
     } catch (error) {
-      // Silently handle errors
+      console.error('Error fetching products overview data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleImageUpload = async (cardIndex: number, file: File) => {
     setUploading({ ...uploading, [cardIndex]: true });
@@ -273,20 +299,79 @@ export function ProductsOverviewEditor() {
         display_order: card.display_order,
       }));
 
-      const response = await fetch('/api/admin/products-overview', {
+      const timestamp = Date.now();
+      const response = await fetch(`/api/admin/products-overview?t=${timestamp}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
         },
         credentials: 'include',
+        cache: 'no-store',
         body: JSON.stringify({ header: headerPayload, cards: cardsPayload }),
       });
 
       if (response.ok) {
+        // The PUT endpoint returns the updated data, use it directly
+        const updatedData = await response.json();
+        console.log('Saved and received updated products overview:', updatedData);
+        
+        // Update state with the returned data
+        if (updatedData.header) {
+          setFormData({
+            en: {
+              title: updatedData.header.title_en ?? '',
+              description: updatedData.header.description_en ?? '',
+              buttonText: updatedData.header.button_text_en ?? '',
+              badgeText: updatedData.header.badge_text_en ?? '',
+            },
+            so: {
+              title: updatedData.header.title_so ?? '',
+              description: updatedData.header.description_so ?? '',
+              buttonText: updatedData.header.button_text_so ?? '',
+              badgeText: updatedData.header.badge_text_so ?? '',
+            },
+            ar: {
+              title: updatedData.header.title_ar ?? '',
+              description: updatedData.header.description_ar ?? '',
+              buttonText: updatedData.header.button_text_ar ?? '',
+              badgeText: updatedData.header.badge_text_ar ?? '',
+            },
+          });
+        }
+        
+        if (updatedData.cards && Array.isArray(updatedData.cards)) {
+          const formCards = updatedData.cards.map((card: ProductsOverviewCard) => ({
+            id: card.id,
+            name_en: card.name_en ?? '',
+            name_so: card.name_so ?? '',
+            name_ar: card.name_ar ?? '',
+            description_en: card.description_en ?? '',
+            description_so: card.description_so ?? '',
+            description_ar: card.description_ar ?? '',
+            image: card.image ?? '',
+            display_order: card.display_order,
+          })).sort((a: CardFormItem, b: CardFormItem) => a.display_order - b.display_order);
+          
+          // Ensure we have exactly 2 cards
+          while (formCards.length < 2) {
+            formCards.push({
+              id: null,
+              name_en: '',
+              name_so: '',
+              name_ar: '',
+              description_en: '',
+              description_so: '',
+              description_ar: '',
+              image: '',
+              display_order: formCards.length + 1,
+            });
+          }
+          setCards(formCards.slice(0, 2));
+        }
+        
         await showSuccessAlert('Products overview section saved successfully!');
-        // Force reload by setting loading and fetching fresh data
-        setLoading(true);
-        await fetchData();
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');

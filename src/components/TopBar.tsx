@@ -3,11 +3,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Language } from '@/types/hero';
+import { ContactInfo } from '@/types/contact';
+import { getLocalizedContactInfo } from '@/lib/contact-helpers';
 
 export default function TopBar() {
   const { language, setLanguage } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const languages: { code: Language; name: string }[] = [
     { code: 'en', name: 'English' },
@@ -16,6 +20,31 @@ export default function TopBar() {
   ];
 
   const currentLanguage = languages.find(l => l.code === language) || languages[0];
+
+  // Fetch contact info on mount
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const response = await fetch('/api/contact-info', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setContactInfo(data);
+        }
+      } catch (error) {
+        console.error('Error fetching contact info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContactInfo();
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -34,47 +63,54 @@ export default function TopBar() {
     };
   }, [isLangOpen]);
 
+  // Get localized contact info
+  const localizedContactInfo = contactInfo ? getLocalizedContactInfo(contactInfo, language) : null;
+  const email = localizedContactInfo?.email || 'info@mirefarms.com';
+  const phone = localizedContactInfo?.phone || '+252 63 4222 609';
+
   return (
     <div className="w-full bg-green-600 border-b border-green-700" dir="ltr">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-10 text-sm">
           {/* Contact Information */}
-          <div className="flex items-center gap-4">
-            <a
-              href="mailto:info@mirefarms.com"
-              className="text-white hover:text-green-100 transition-colors duration-200 flex items-center gap-1.5"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+          {!loading && (
+            <div className="flex items-center gap-4">
+              <a
+                href={`mailto:${email}`}
+                className="text-white hover:text-green-100 transition-colors duration-200 flex items-center gap-1.5"
               >
-                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="hidden sm:inline">info@mirefarms.com</span>
-            </a>
-            <a
-              href="tel:+1234567890"
-              className="text-white hover:text-green-100 transition-colors duration-200 flex items-center gap-1.5"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span className="hidden sm:inline">{email}</span>
+              </a>
+              <a
+                href={`tel:${phone.replace(/\s+/g, '')}`}
+                className="text-white hover:text-green-100 transition-colors duration-200 flex items-center gap-1.5"
               >
-                <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              <span className="hidden sm:inline">+252 63 3338109</span>
-            </a>
-          </div>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span className="hidden sm:inline">{phone}</span>
+              </a>
+            </div>
+          )}
 
           {/* Language Selector */}
           <div className="relative" ref={dropdownRef}>

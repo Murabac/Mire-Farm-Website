@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Save, Languages, Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { ContactInfo } from '@/types/contact';
 import { Language } from '@/types/hero';
@@ -29,19 +29,19 @@ export function ContactInfoEditor() {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<ContactInfoFormData>({
     en: {
-      location: 'Arabsiyo Village, Gabiley Region, Somaliland',
-      hours: 'Saturday - Thursday: 7:00 AM - 5:00 PM\nFriday: Closed',
+      location: '',
+      hours: '',
     },
     so: {
-      location: 'Magaalada Arabsiyo, Gobolka Gabiley, Somaliland',
-      hours: 'Sabti - Khamiis: 7:00 AM - 5:00 PM\nJimco: Xiran',
+      location: '',
+      hours: '',
     },
     ar: {
-      location: 'قرية عربسيو، منطقة جابيلي، أرض الصومال',
-      hours: 'السبت - الخميس: 7:00 صباحاً - 5:00 مساءً\nالجمعة: مغلق',
+      location: '',
+      hours: '',
     },
-    phone: '+252 63 4222 609',
-    email: 'info@mirefarms.com',
+    phone: '',
+    email: '',
   });
 
   const languages = [
@@ -50,47 +50,86 @@ export function ContactInfoEditor() {
     { code: 'ar', name: 'Arabic', flag: '🇸🇦' }
   ];
 
-  // Fetch data on mount
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      // Add cache-busting parameter to ensure fresh data
-      const response = await fetch(`/api/admin/contact-info?t=${Date.now()}`, {
+      setLoading(true);
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(7);
+      const response = await fetch(`/api/admin/contact-info?t=${timestamp}&r=${random}`, {
+        method: 'GET',
         credentials: 'include',
         cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       });
 
       if (response.ok) {
         const data: ContactInfo | null = await response.json();
+        console.log('Fetched contact info data from API:', data);
+        console.log('Timestamp:', timestamp);
         
         if (data) {
+          console.log('Setting contact info form data:', data);
           setFormData({
             en: {
-              location: data.location_en || '',
-              hours: data.hours_en || '',
+              location: data.location_en ?? '',
+              hours: data.hours_en ?? '',
             },
             so: {
-              location: data.location_so || '',
-              hours: data.hours_so || '',
+              location: data.location_so ?? '',
+              hours: data.hours_so ?? '',
             },
             ar: {
-              location: data.location_ar || '',
-              hours: data.hours_ar || '',
+              location: data.location_ar ?? '',
+              hours: data.hours_ar ?? '',
             },
-            phone: data.phone || '',
-            email: data.email || '',
+            phone: data.phone ?? '',
+            email: data.email ?? '',
+          });
+        } else {
+          // Reset to empty if no data
+          setFormData({
+            en: { location: '', hours: '' },
+            so: { location: '', hours: '' },
+            ar: { location: '', hours: '' },
+            phone: '',
+            email: '',
           });
         }
+      } else {
+        console.error('Failed to fetch contact info:', response.status, response.statusText);
+        // Reset state on error
+        setFormData({
+          en: { location: '', hours: '' },
+          so: { location: '', hours: '' },
+          ar: { location: '', hours: '' },
+          phone: '',
+          email: '',
+        });
       }
     } catch (error) {
-      // Silently handle errors
+      console.error('Error fetching contact info data:', error);
+      setFormData({
+        en: { location: '', hours: '' },
+        so: { location: '', hours: '' },
+        ar: { location: '', hours: '' },
+        phone: '',
+        email: '',
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -106,20 +145,43 @@ export function ContactInfoEditor() {
         email: formData.email,
       };
 
-      const response = await fetch('/api/admin/contact-info', {
+      const timestamp = Date.now();
+      const response = await fetch(`/api/admin/contact-info?t=${timestamp}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
         },
         credentials: 'include',
+        cache: 'no-store',
         body: JSON.stringify(payload),
       });
 
       if (response.ok) {
+        // The PUT endpoint returns the updated data, use it directly
+        const updatedData: ContactInfo = await response.json();
+        console.log('Saved and received updated contact info:', updatedData);
+        
+        // Update state with the returned data
+        setFormData({
+          en: {
+            location: updatedData.location_en ?? '',
+            hours: updatedData.hours_en ?? '',
+          },
+          so: {
+            location: updatedData.location_so ?? '',
+            hours: updatedData.hours_so ?? '',
+          },
+          ar: {
+            location: updatedData.location_ar ?? '',
+            hours: updatedData.hours_ar ?? '',
+          },
+          phone: updatedData.phone ?? '',
+          email: updatedData.email ?? '',
+        });
+        
         await showSuccessAlert('Contact info saved successfully!');
-        // Force reload by setting loading and fetching fresh data
-        setLoading(true);
-        await fetchData();
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
@@ -312,5 +374,6 @@ export function ContactInfoEditor() {
     </div>
   );
 }
+
 
 

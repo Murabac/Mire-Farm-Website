@@ -81,20 +81,29 @@ export default function BusinessModelEditorPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/business-model?t=${Date.now()}`, {
+      // Use multiple cache-busting techniques
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(7);
+      const response = await fetch(`/api/admin/business-model?t=${timestamp}&r=${random}`, {
+        method: 'GET',
         credentials: 'include',
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate',
           'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Requested-With': 'XMLHttpRequest',
         },
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched business model data from API:', data);
+        console.log('Timestamp:', timestamp);
         
         // Always update state with fetched data (or reset to empty if no data)
         if (data.businessModel) {
+          console.log('Setting business model:', data.businessModel);
           setBusinessModel({
             id: data.businessModel.id,
             badge_text_en: data.businessModel.badge_text_en ?? '',
@@ -106,13 +115,30 @@ export default function BusinessModelEditorPage() {
             description_en: data.businessModel.description_en ?? '',
             description_so: data.businessModel.description_so ?? '',
             description_ar: data.businessModel.description_ar ?? '',
-            image_url: data.businessModel.image_url ?? '/images/our-farm-hero.jpg',
+            image_url: data.businessModel.image_url ?? '',
             active: data.businessModel.active !== false,
+          });
+        } else {
+          // Reset to empty if no business model
+          setBusinessModel({
+            id: null,
+            badge_text_en: '',
+            badge_text_so: '',
+            badge_text_ar: '',
+            title_en: '',
+            title_so: '',
+            title_ar: '',
+            description_en: '',
+            description_so: '',
+            description_ar: '',
+            image_url: '',
+            active: true,
           });
         }
 
         // Update features from database
-        if (data.features && Array.isArray(data.features)) {
+        if (data.features && Array.isArray(data.features) && data.features.length > 0) {
+          console.log('Setting features:', data.features);
           setFeatures(data.features.map((f: BusinessModelFeature) => ({
             id: f.id,
             icon_type: f.icon_type ?? 'map_pin',
@@ -128,12 +154,32 @@ export default function BusinessModelEditorPage() {
             display_order: f.display_order,
             active: f.active !== false,
           })));
+        } else {
+          console.log('No features found, setting empty array');
+          setFeatures([]);
         }
       } else {
-        console.error('Failed to fetch business model data:', response.status);
+        console.error('Failed to fetch business model data:', response.status, response.statusText);
+        // Reset state on error
+        setBusinessModel({
+          id: null,
+          badge_text_en: '',
+          badge_text_so: '',
+          badge_text_ar: '',
+          title_en: '',
+          title_so: '',
+          title_ar: '',
+          description_en: '',
+          description_so: '',
+          description_ar: '',
+          image_url: '',
+          active: true,
+        });
+        setFeatures([]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setFeatures([]);
     } finally {
       setLoading(false);
     }
@@ -184,16 +230,63 @@ export default function BusinessModelEditorPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch('/api/admin/business-model', {
+      const timestamp = Date.now();
+      const response = await fetch(`/api/admin/business-model?t=${timestamp}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
         credentials: 'include',
+        cache: 'no-store',
         body: JSON.stringify({ businessModel, features }),
       });
 
       if (response.ok) {
+        // The PUT endpoint returns the updated data, use it directly
+        const updatedData = await response.json();
+        console.log('Saved and received updated business model:', updatedData);
+        
+        // Update state with the returned data
+        if (updatedData.businessModel) {
+          setBusinessModel({
+            id: updatedData.businessModel.id,
+            badge_text_en: updatedData.businessModel.badge_text_en ?? '',
+            badge_text_so: updatedData.businessModel.badge_text_so ?? '',
+            badge_text_ar: updatedData.businessModel.badge_text_ar ?? '',
+            title_en: updatedData.businessModel.title_en ?? '',
+            title_so: updatedData.businessModel.title_so ?? '',
+            title_ar: updatedData.businessModel.title_ar ?? '',
+            description_en: updatedData.businessModel.description_en ?? '',
+            description_so: updatedData.businessModel.description_so ?? '',
+            description_ar: updatedData.businessModel.description_ar ?? '',
+            image_url: updatedData.businessModel.image_url ?? '',
+            active: updatedData.businessModel.active !== false,
+          });
+        }
+        
+        if (updatedData.features && Array.isArray(updatedData.features)) {
+          setFeatures(updatedData.features.map((f: BusinessModelFeature) => ({
+            id: f.id,
+            icon_type: f.icon_type ?? 'map_pin',
+            title_en: f.title_en ?? '',
+            title_so: f.title_so ?? '',
+            title_ar: f.title_ar ?? '',
+            description_en: f.description_en ?? '',
+            description_so: f.description_so ?? '',
+            description_ar: f.description_ar ?? '',
+            bg_color_class: f.bg_color_class ?? 'from-green-50 to-blue-50',
+            border_color_class: f.border_color_class ?? 'border-green-100',
+            icon_bg_color: f.icon_bg_color ?? 'bg-[#6B9E3E]',
+            display_order: f.display_order,
+            active: f.active !== false,
+          })));
+        } else {
+          setFeatures([]);
+        }
+        
         await showSuccessAlert('Business Model section saved successfully!');
-        await fetchData();
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');

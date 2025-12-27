@@ -4,6 +4,8 @@ import { verifyToken, getTokenFromCookies } from '@/lib/auth-utils';
 import { Benefit } from '@/types/benefits';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,7 +45,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(data as Benefit[]);
+    console.log('API: Fetched benefits from database:', JSON.stringify(data, null, 2));
+    console.log('API: Number of benefits:', data?.length || 0);
+
+    const response = NextResponse.json(data as Benefit[], {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+    return response;
   } catch (error) {
     console.error('Get benefits error:', error);
     return NextResponse.json(
@@ -183,7 +196,15 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(allBenefits as Benefit[]);
+    const response = NextResponse.json(allBenefits as Benefit[], {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+    return response;
   } catch (error) {
     console.error('Update benefits error:', error);
     return NextResponse.json(

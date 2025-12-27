@@ -3,11 +3,14 @@ import { createServerClient } from '@/lib/supabase';
 import { verifyToken, getTokenFromCookies } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 const noCacheHeaders = {
-  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
   'Pragma': 'no-cache',
   'Expires': '0',
+  'X-Content-Type-Options': 'nosniff',
 };
 
 export async function GET(request: NextRequest) {
@@ -55,6 +58,12 @@ export async function GET(request: NextRequest) {
     if (statsError) {
       console.error('Error fetching growth expansion stats:', statsError);
     }
+
+    console.log('API: GET - Fetched growth expansion from database:', {
+      header,
+      plans,
+      stats,
+    });
 
     return NextResponse.json({
       header: header || null,
@@ -225,11 +234,50 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true }, { headers: noCacheHeaders });
+    // Fetch and return updated data
+    const { data: updatedHeader, error: fetchHeaderError } = await supabase
+      .from('growth_expansion_header')
+      .select('*')
+      .single();
+
+    if (fetchHeaderError && fetchHeaderError.code !== 'PGRST116') {
+      console.error('Error fetching updated header:', fetchHeaderError);
+    }
+
+    const { data: updatedPlans, error: fetchPlansError } = await supabase
+      .from('growth_expansion_plans')
+      .select('*')
+      .order('display_order', { ascending: true });
+
+    if (fetchPlansError) {
+      console.error('Error fetching updated plans:', fetchPlansError);
+    }
+
+    const { data: updatedStats, error: fetchStatsError } = await supabase
+      .from('growth_expansion_stats')
+      .select('*')
+      .order('display_order', { ascending: true });
+
+    if (fetchStatsError) {
+      console.error('Error fetching updated stats:', fetchStatsError);
+    }
+
+    console.log('API: PUT - Fetched updated growth expansion from database:', {
+      header: updatedHeader,
+      plans: updatedPlans,
+      stats: updatedStats,
+    });
+
+    return NextResponse.json({
+      header: updatedHeader || null,
+      plans: updatedPlans || [],
+      stats: updatedStats || [],
+    }, { headers: noCacheHeaders });
   } catch (error) {
     console.error('Put growth expansion error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: noCacheHeaders });
   }
 }
+
 
 

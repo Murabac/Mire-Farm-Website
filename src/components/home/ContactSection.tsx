@@ -146,9 +146,22 @@ export default function ContactSection({ contactInfoData }: ContactSectionProps)
           <div className="space-y-8">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <h3 className="text-xl mb-3">{text.locationLabel}</h3>
-              <p className="text-lg leading-relaxed whitespace-pre-line">
+              <p className="text-lg leading-relaxed whitespace-pre-line mb-4">
                 {localizedContactInfo.location}
               </p>
+              {/* Google Maps Embed */}
+              <div className="w-full h-64 rounded-xl overflow-hidden border border-white/20">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d1807.8296492909358!2d43.766035331519376!3d9.665503653658375!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zOcKwMzknNTguMyJOIDQzwrA0NSc1Ny40IkU!5e1!3m2!1sen!2sso!4v1766836712094!5m2!1sen!2sso"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full h-full"
+                ></iframe>
+              </div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <h3 className="text-xl mb-3">{text.phoneLabel}</h3>

@@ -35,6 +35,10 @@ export default function PageHeadersEditorPage() {
       const response = await fetch(`/api/admin/page-headers?t=${Date.now()}`, {
         credentials: 'include',
         cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
       });
 
       if (response.ok) {
