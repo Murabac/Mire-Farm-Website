@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Language } from '@/types/hero';
 
 interface LanguageSetting {
@@ -23,54 +23,85 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Start with empty array - languages will be loaded from API
   const [enabledLanguages, setEnabledLanguages] = useState<Language[]>([]);
 
-  // Fetch enabled languages on mount
-  useEffect(() => {
-    const fetchEnabledLanguages = async () => {
-      try {
-        const response = await fetch('/api/admin/settings/languages');
-        if (response.ok) {
-          const settings: LanguageSetting[] = await response.json();
-          const enabled = settings
-            .filter(s => s.enabled === true)
-            .sort((a, b) => a.display_order - b.display_order)
-            .map(s => s.language_code as Language);
+  // Fetch enabled languages - wrapped in useCallback for stability
+  const fetchEnabledLanguages = useCallback(async () => {
+    try {
+      // Add cache-busting to get fresh data
+      const response = await fetch(`/api/admin/settings/languages?t=${Date.now()}&r=${Math.random().toString(36).substring(7)}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
+      if (response.ok) {
+        const settings: LanguageSetting[] = await response.json();
+        const enabled = settings
+          .filter(s => Boolean(s.enabled) === true)
+          .sort((a, b) => a.display_order - b.display_order)
+          .map(s => s.language_code as Language);
+        
+        if (enabled.length > 0) {
+          setEnabledLanguages(enabled);
           
-          if (enabled.length > 0) {
-            setEnabledLanguages(enabled);
-            
-            // Get saved language from localStorage
-            const savedLanguage = localStorage.getItem('mire-farm-language') as Language;
-            
-            // Validate saved language is enabled, if not use first enabled language
-            let languageToSet: Language;
-            if (savedLanguage && enabled.includes(savedLanguage)) {
-              languageToSet = savedLanguage;
-            } else {
-              languageToSet = enabled[0];
-              localStorage.setItem('mire-farm-language', enabled[0]);
-            }
-            
-            // Set the validated language
-            setLanguageState(languageToSet);
-            
-            // Update HTML attributes immediately
-            document.documentElement.lang = languageToSet;
-            if (languageToSet === 'ar') {
-              document.documentElement.dir = 'rtl';
-            } else {
-              document.documentElement.dir = 'ltr';
-            }
+          // Get saved language from localStorage
+          const savedLanguage = localStorage.getItem('mire-farm-language') as Language;
+          
+          // Validate saved language is enabled, if not use first enabled language
+          let languageToSet: Language;
+          if (savedLanguage && enabled.includes(savedLanguage)) {
+            languageToSet = savedLanguage;
+          } else {
+            languageToSet = enabled[0];
+            localStorage.setItem('mire-farm-language', enabled[0]);
+          }
+          
+          // Set the validated language
+          setLanguageState(languageToSet);
+          
+          // Update HTML attributes immediately
+          document.documentElement.lang = languageToSet;
+          if (languageToSet === 'ar') {
+            document.documentElement.dir = 'rtl';
+          } else {
+            document.documentElement.dir = 'ltr';
           }
         }
-      } catch (error) {
-        // Silently handle errors
-      } finally {
-        setMounted(true);
+      }
+    } catch (error) {
+      console.error('Error fetching enabled languages:', error);
+    } finally {
+      setMounted(true);
+    }
+  }, []);
+
+  // Fetch enabled languages on mount
+  useEffect(() => {
+    fetchEnabledLanguages();
+  }, [fetchEnabledLanguages]);
+
+  // Refresh enabled languages when page becomes visible or gains focus (user switches tabs/windows back)
+  useEffect(() => {
+    if (!mounted) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchEnabledLanguages();
       }
     };
 
-    fetchEnabledLanguages();
-  }, []);
+    const handleFocus = () => {
+      fetchEnabledLanguages();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchEnabledLanguages, mounted]);
 
   // Save language to localStorage when it changes
   const setLanguage = (lang: Language) => {

@@ -129,8 +129,14 @@ export default function SettingsPage() {
   const fetchLanguageSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/settings/languages', {
+      // Add cache-busting to get fresh data
+      const response = await fetch(`/api/admin/settings/languages?t=${Date.now()}`, {
         credentials: 'include',
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
       });
       
       if (!response.ok) {
@@ -150,8 +156,11 @@ export default function SettingsPage() {
         const completeData: LanguageSetting[] = allLanguageCodes.map((code, index) => {
           const existing = languageMap.get(code);
           if (existing) {
-            // Use the actual database value - this preserves enabled: false if that's what's in DB
-            return existing;
+            // Use the actual database value - explicitly convert enabled to boolean
+            return {
+              ...existing,
+              enabled: Boolean(existing.enabled),
+            };
           } else {
             // Only add default if language is missing from database
             return {
@@ -175,7 +184,7 @@ export default function SettingsPage() {
         setLanguageSettings(defaultSettings);
       }
     } catch (error) {
-      // Silently handle errors
+      console.error('Error fetching language settings:', error);
     } finally {
       setLoading(false);
     }
@@ -201,24 +210,57 @@ export default function SettingsPage() {
   const handleSaveLanguages = async () => {
     setSaving(true);
     try {
-      const response = await fetch('/api/admin/settings/languages', {
+      // Ensure enabled values are explicitly booleans
+      const settingsToSave = languageSettings.map(s => ({
+        ...s,
+        enabled: Boolean(s.enabled),
+      }));
+
+      const response = await fetch(`/api/admin/settings/languages?t=${Date.now()}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
         },
         credentials: 'include',
-        body: JSON.stringify({ settings: languageSettings }),
+        cache: 'no-store',
+        body: JSON.stringify({ settings: settingsToSave }),
       });
 
       if (response.ok) {
+        const updatedSettings = await response.json();
+        // Use the response data directly to update state
+        if (updatedSettings && Array.isArray(updatedSettings) && updatedSettings.length > 0) {
+          const allLanguageCodes = ['en', 'so', 'ar'];
+          const languageMap = new Map(updatedSettings.map((s: LanguageSetting) => [s.language_code, s]));
+          
+          const completeData: LanguageSetting[] = allLanguageCodes.map((code, index) => {
+            const existing = languageMap.get(code);
+            if (existing) {
+              return {
+                ...existing,
+                enabled: Boolean(existing.enabled),
+              };
+            } else {
+              return {
+                language_code: code,
+                enabled: code === 'en',
+                display_order: index + 1,
+              };
+            }
+          });
+          
+          completeData.sort((a, b) => a.display_order - b.display_order);
+          setLanguageSettings(completeData);
+        }
         await showSuccessAlert('Language settings saved successfully!');
-        // Reload settings from API to ensure we have the latest data
-        await fetchLanguageSettings();
       } else {
         const errorData = await response.json().catch(() => ({}));
         await showErrorAlert(errorData.error || 'Unknown error', 'Failed to save');
       }
     } catch (error) {
+      console.error('Error saving language settings:', error);
       await showErrorAlert('Failed to save language settings. Please try again.', 'Error');
     } finally {
       setSaving(false);

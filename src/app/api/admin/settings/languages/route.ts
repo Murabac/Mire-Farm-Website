@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { verifyToken, getTokenFromCookies } from '@/lib/auth-utils';
 
+// Force dynamic rendering and prevent caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = createServerClient();
@@ -34,7 +39,14 @@ export async function GET(request: NextRequest) {
       enabled: Boolean(item.enabled),
     }));
 
-    return NextResponse.json(normalizedData);
+    // Add cache headers to prevent caching
+    const headers = new Headers();
+    headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    headers.set('Pragma', 'no-cache');
+    headers.set('Expires', '0');
+    headers.set('X-Content-Type-Options', 'nosniff');
+
+    return NextResponse.json(normalizedData, { headers });
   } catch (error) {
     // Return error instead of defaults so we can debug
     return NextResponse.json(
@@ -152,7 +164,20 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(updatedSettings || []);
+    // Explicitly ensure boolean values are properly typed
+    const normalizedSettings = (updatedSettings || []).map((item: any) => ({
+      ...item,
+      enabled: Boolean(item.enabled),
+    }));
+
+    // Add cache headers to prevent caching
+    const headers = new Headers();
+    headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    headers.set('Pragma', 'no-cache');
+    headers.set('Expires', '0');
+    headers.set('X-Content-Type-Options', 'nosniff');
+
+    return NextResponse.json(normalizedSettings, { headers });
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
